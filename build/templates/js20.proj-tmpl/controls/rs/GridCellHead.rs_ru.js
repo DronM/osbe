@@ -1,0 +1,1 @@
+GridCellHead.prototype.TITLE = "упорядочить";

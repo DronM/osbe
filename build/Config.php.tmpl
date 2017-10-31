@@ -1,0 +1,24 @@
+<?php
+/**
+ * XSLT processor command template
+ * Following strings will be replaced with values
+ * outFile - full path to output file
+ * inFile - full path to input file
+ * templFile - full path to xslt file
+ * if XSLT_PROCESSOR_TEMPLATE is sot set than standart php XSLTProcessor is used
+ */
+//define('XSLT_PROCESSOR_TEMPLATE', 'xalan  -out #outFile -in #inFile -xsl #templFile');
+
+/**
+ * External symbolic link creation for windows platforms
+ * If not defined standart PHP symlink will be used
+ * link and target are parameters that will be replaced with values
+ */
+//define('SYMLINK_TEMPLATE', 'junction  #link #target');
+
+/**
+ * JSDoc executable
+ * https://github.com/jsdoc3/jsdoc
+ */
+define('JSDOC', 'node_modules/.bin/jsdoc');
+?>

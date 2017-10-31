@@ -1,0 +1,10 @@
+RepCommands.prototype.BTN_MAKE_CAP = "Сформировать";
+RepCommands.prototype.BTN_MAKE_TITLE = "Сформировать отчет";
+RepCommands.prototype.BTN_PRINT_CAP = "Печать";
+RepCommands.prototype.BTN_PRINT_TITLE = "Напечатать отчет";
+RepCommands.prototype.BTN_EXCEL_CAP = "Excel";
+RepCommands.prototype.BTN_EXCEL_TITLE = "Экспорт отчета в excel";
+RepCommands.prototype.BTN_PDF_CAP = "PDF";
+RepCommands.prototype.BTN_PDF_TITLE = "Экспорт отчета в pdf";
+RepCommands.prototype.BTN_FILTER_CAP = "Параметры";
+RepCommands.prototype.BTN_FILTER_TITLE = "Показать/скрыть параметры отчета";

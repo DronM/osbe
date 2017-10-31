@@ -1,0 +1,63 @@
+class Controller{
+	public
+		addPublicMethod
+		checkPublicMethod
+		getPublicMethodById
+		getServConnector
+		setServConnector
+		getId
+		setId
+		runPublicMethod
+		constructor(String id,ServConnector servConnector)
+}
+
+class ControllerDb extends Controller{
+	public
+		setObjModelId
+		setListModelId
+}
+
+class ServConnector{
+	public
+		constructor(String host,String script)
+		sendPost
+		sendGet
+}
+
+class ServResponse{
+	public
+		parse(XML)
+		getRespResult
+		getRespDescr
+		getModelCount
+		getModelByIndex
+		getModelById
+}
+
+class Model{
+	public
+		constructor(node)
+		checkField
+		getFieldCount
+		addField
+		setNode
+		getNode
+		getActive
+		setActive
+		getFieldById
+		getFieldByIndex
+		getReadOnly
+		getListCount
+		getListFrom
+		getTotCount
+		getRowCount
+		getNextRow
+		getRowPos
+		insertRow
+		
+}
+
+class DataSource{
+	public
+		constructor(controller,options)
+}

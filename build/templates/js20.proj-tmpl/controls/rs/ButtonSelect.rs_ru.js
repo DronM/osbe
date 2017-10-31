@@ -1,0 +1,1 @@
+ButtonSelect.prototype.DEF_TITLE = "выбрать";

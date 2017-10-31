@@ -1,0 +1,67 @@
+http://www.dynamicdrive.com/dynamicindex17/dockcontent.htm
+
+
+
+
+
+<style type="text/css">
+
+.dockclass{
+position:relative;
+}
+
+</style>
+
+<body>
+
+<script type="text/javascript">
+
+/***********************************************
+* Dock Content script- Created by and © Dynamicdrive.com
+* This notice must stay intact for use
+* Visit http://www.dynamicdrive.com/ for full script
+***********************************************/
+
+var offsetfromedge=0      //offset from window edge when content is "docked". Change if desired.
+var dockarray=new Array() //array to cache dockit instances
+var dkclear=new Array()   //array to cache corresponding clearinterval pointers
+
+function dockit(el, duration){
+this.source=document.all? document.all[el] : document.getElementById(el);
+this.source.height=this.source.offsetHeight;
+this.docheight=truebody().clientHeight;
+this.duration=duration;
+this.pagetop=0;
+this.elementoffset=this.getOffsetY();
+dockarray[dockarray.length]=this;
+var pointer=eval(dockarray.length-1);
+var dynexpress='dkclear['+pointer+']=setInterval("dockornot(dockarray['+pointer+'])",100);';
+dynexpress=(this.duration>0)? dynexpress+'setTimeout("clearInterval(dkclear['+pointer+']); dockarray['+pointer+'].source.style.top=0", duration*1000)' : dynexpress;
+eval(dynexpress);
+}
+
+dockit.prototype.getOffsetY=function(){
+var totaloffset=parseInt(this.source.offsetTop);
+var parentEl=this.source.offsetParent;
+while (parentEl!=null){
+totaloffset+=parentEl.offsetTop;
+parentEl=parentEl.offsetParent;
+}
+return totaloffset;
+}
+
+function dockornot(obj){
+obj.pagetop=truebody().scrollTop;
+if (obj.pagetop>obj.elementoffset) //detect upper offset
+obj.source.style.top=obj.pagetop-obj.elementoffset+offsetfromedge+"px";
+else if (obj.pagetop+obj.docheight<obj.elementoffset+parseInt(obj.source.height)) //lower offset
+obj.source.style.top=obj.pagetop+obj.docheight-obj.source.height-obj.elementoffset-offsetfromedge+"px";
+else
+obj.source.style.top=0;
+}
+
+function truebody(){
+return (document.compatMode && document.compatMode!="BackCompat")? document.documentElement : document.body
+}
+
+</script>

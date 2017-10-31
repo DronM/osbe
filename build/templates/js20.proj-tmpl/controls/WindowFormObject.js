@@ -1,0 +1,122 @@
+/**
+ * @author Andrey Mikhalevich <katrenplus@mail.ru>, 2014
+ 
+ * @extends WindowForm
+ * @class
+ * @classdesc Basic visual view
+ 
+ * @requires core/extend.js
+ * @requires controls/WindowForm.js     
+  
+ * @param {Object} options
+ */
+function WindowFormObject(options){
+	options = options || {};	
+	/*
+	if (!options.method){
+		throw Error(this.ER_NO_METHOD);
+	}
+	*/
+//window.getApp()	
+	options.host = options.host || options.app.getHost();
+	options.script = options.script || options.app.getScript();
+	options.URLParams = options.URLParams || "";
+	
+	if (options.formName){
+		options.controller = options.controller || options.formName+"_Controller";
+		options.template = options.template || options.formName;
+	}
+	
+	options.view = options.view || "Child";
+
+	options.keys = options.keys || {"id":null};
+	
+	if (options.fullScreen==undefined && options.width==undefined && options.height==undefined){
+		options.fullScreen = true;
+	}
+	options.name = options.formName+CommonHelper.serialize(options.keys);
+	
+	this.setController(options.controller);
+	this.setMethod(options.method);
+	this.setTemplate(options.template);
+	this.setView(options.view);
+	this.setKeys(options.keys); 
+	
+	WindowFormObject.superclass.constructor.call(this,options);
+	
+}
+extend(WindowFormObject,WindowForm);
+
+/* Constants */
+
+
+/* private members */
+WindowFormObject.prototype.m_controller;
+WindowFormObject.prototype.m_method;
+WindowFormObject.prototype.m_template;
+WindowFormObject.prototype.m_view;
+WindowFormObject.prototype.m_keys;
+WindowFormObject.prototype.m_keyIds;
+
+/* protected*/
+
+/* public methods */
+WindowFormObject.prototype.getURLParams = function(){
+	var str = "c="+this.m_controller;
+	str += "&f="+this.m_method;
+	if(this.m_template) str += "&t="+this.m_template;	
+	str += "&v="+this.m_view;
+	
+	for(var fid in this.m_keys){
+		if (this.m_keys[fid]!=undefined){
+			str += "&"+fid+"="+this.m_keys[fid];
+		}
+	}
+	
+	if (this.m_URLParams){
+		str += "&"+this.m_URLParams;
+	}
+	
+	return str;
+}
+
+WindowFormObject.prototype.setKeys = function(v){
+	this.m_keyIds = [];
+	for (var keyid in v){
+		this.m_keyIds.push(keyid);
+	}
+
+	this.m_keys = v
+}
+
+WindowFormObject.prototype.getKeys = function(){
+	return this.m_keys;
+}
+WindowFormObject.prototype.getKeyIds = function(){
+	return this.m_keyIds;
+}
+
+WindowFormObject.prototype.setController = function(v){
+	this.m_controller = v
+}
+WindowFormObject.prototype.getController = function(){
+	return this.m_controller;
+}
+WindowFormObject.prototype.setMethod = function(v){
+	this.m_method = v
+}
+WindowFormObject.prototype.getMethod = function(){
+	return this.m_method;
+}
+WindowFormObject.prototype.setView = function(v){
+	this.m_view = v
+}
+WindowFormObject.prototype.getView = function(){
+	return this.m_view;
+}
+WindowFormObject.prototype.setTemplate = function(v){
+	this.m_template = v
+}
+WindowFormObject.prototype.getTemplate = function(){
+	return this.m_template;
+}

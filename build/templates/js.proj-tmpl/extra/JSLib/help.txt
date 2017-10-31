@@ -1,0 +1,119 @@
+Javascript Library Help Document
+Ver 1.2
+CONTACT: jerry.wang@clochase.com
+
+Memo:	This library is developed by Jerry.wang, and anyone can use it.
+		But if you find any bugs or improves, please notice me, thank you very much.
+
+History:	V1.0	2006-10-10
+			V1.1	2006-10-15
+					* Improve:	Rename InputType
+					* Fix bug:	If there is already a value for mask edit when page load,
+								the value will be removed.
+					* Improve:	Change the Escape Character to $A $a $d
+					* Fix bug:	Should prevent contentmenu and cutting in mask edit in IE
+					* Improve:	Add the Auto-trim textbox
+					* Improve:	Add the Tip textbox
+			V1.2	2006-11-05
+					* Improve:	Add the javascript object browser
+					* Improve:	For the InitializeXXX functions, can pass eithor ctrl id ot instance
+					* Fix bug:	If the mask edit get focus, the input cursor will move to the first
+								unfilled position.
+					* Improve:	Add the AJAX class
+=======================================================================
+
+
+Global.js
+****************************************************************************
+//-------------------------------------------------------------------------
+// Function Name    :$import
+// Parameter(s)     :path       The js file name
+// Memo             :To include another *.js in the HTML page
+//-------------------------------------------------------------------------
+function $import( path )
+
+
+//-------------------------------------------------------------------------
+// Function Name    :GetAbsoluteUrl
+// Parameter(s)     :path       file name
+// Memo             :To get the Absolute Url of the file 
+//-------------------------------------------------------------------------
+function GetAbsoluteUrl(path) 
+
+
+//-------------------------------------------------------------------------
+// Function Name    :GetUrlParameter
+// Parameter(s)     :strName    the parameter's name
+// Memo             :To get parameter's value
+//-------------------------------------------------------------------------
+function GetUrlParameter(strName)
+
+
+
+
+
+Textbox.Restriction.js
+****************************************************************************
+
+//-------------------------------------------------------------------------
+// Function Name    :InitializeTextbox
+// Parameter(s)     :strId      the ctrl id
+//                  :emType     the InputType
+// Return           :bool
+//-------------------------------------------------------------------------
+function InitializeTextbox( strId, emType)
+
+InitializeTextbox( "TextboxID", InputType.NonnegativeInteger);
+InitializeTextbox( "TextboxID", InputType.WholeNumber);
+InitializeTextbox( "TextboxID", InputType.Currency); 
+
+
+
+
+
+
+
+Textbox.MaskEdit.js
+****************************************************************************
+//-------------------------------------------------------------------------
+// Function Name    :InitializeMaskEdit
+// Parameter(s)     :strId           The ID of the textbox
+//                  :strMaskPattern  The mask pattern
+// Return           :bool            Whether or not succeed
+//-------------------------------------------------------------------------
+function InitializeMaskEdit( strId, strMaskPattern)
+
+InitializeMaskEdit( "TextboxID", "$A$d$A $d$A$d");
+InitializeMaskEdit( "TextboxID", "($d$d$d)$d$d$d-$d$d$d");
+InitializeMaskEdit( "TextboxID", "A*$d$d$d$d$d");
+
+
+
+
+
+
+Textbox.Trim.js
+****************************************************************************
+//-------------------------------------------------------------------------
+// Function Name    :InitializeTrimBox
+// Parameter(s)     :strId           The ID of the textbox [can be null]
+// Memo             :If the strId is null, this function will Initialize
+//                  :all the textboxes on the page
+//-------------------------------------------------------------------------
+function InitializeTrimBox(strId)
+
+
+
+
+
+
+
+
+Textbox.Tip.js
+****************************************************************************
+//-------------------------------------------------------------------------
+// Function Name    :InitializeTipBox
+// Parameter(s)     :strId           The ID of the textbox
+//                  :strTip          The tip will be shown if the it is empty
+//-------------------------------------------------------------------------
+function InitializeTipBox( strId, strTip)

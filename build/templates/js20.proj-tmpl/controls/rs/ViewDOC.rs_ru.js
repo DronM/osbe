@@ -1,0 +1,9 @@
+ViewDOC.prototype.BTN_OK_CAP = "Провести";
+ViewDOC.prototype.BTN_OK_TITLE = "Провести документ и закрыть форму";
+ViewDOC.prototype.BTN_SAVE_CAP = "Записать";
+ViewDOC.prototype.BTN_SAVE_TITLE = "Записать документ";
+ViewDOC.prototype.BTN_CLOSE_CAP = "Закрыть";
+ViewDOC.prototype.BTN_CLOSE_TITLE = "Закрыть форму";
+ViewDOC.prototype.CTRL_NUM_LABEL = "№";
+ViewDOC.prototype.CTRL_DATE_LABEL = "от";
+ViewDOC.prototype.NOTE_SAVED = "Документ записан";

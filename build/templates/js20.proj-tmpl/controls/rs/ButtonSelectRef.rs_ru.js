@@ -1,0 +1,1 @@
+ButtonSelectRef.prototype.DEF_TITLE = "выбрать из списка";ButtonSelectRef.prototype.DEF_SEL_FORM_TITLE = "Выбор";

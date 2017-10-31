@@ -1,0 +1,8 @@
+<?php
+/*Contstants unique to this server
+*/
+
+//host for js
+define('BASE_PATH','http://localhost/?/');
+
+?>

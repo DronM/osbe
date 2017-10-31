@@ -1,0 +1,37 @@
+<div modelId="About_Model">
+	<!-- {{window.getBsCol(6)}} -->
+	<div class="row">
+		<label class="control-label {{window.getBsCol(3)}}">Приложение: </label>
+		<div class="{{window.getBsCol(4)}}">
+		{{this.model.getFieldValue("app_name")}}</div>
+	</div>
+	<div class="row">
+		<label class="control-label {{window.getBsCol(3)}}">Версия: </label>
+		<div class="{{window.getBsCol(4)}}">
+		{{this.model.getFieldValue("app_version")}}</div>
+	</div>
+
+	<div class="row">
+		<label class="control-label {{window.getBsCol(3)}}">Разработчик: </label>
+		<div class="{{window.getBsCol(4)}}">
+		{{this.model.getFieldValue("author")}}</div>
+	</div>
+
+	<div class="row">
+		<label class="control-label {{window.getBsCol(3)}}">Тех.поддержка: </label>
+		<div class="{{window.getBsCol(4)}}">
+		{{this.model.getFieldValue("tech_mail")}}</div>
+	</div>
+	
+	<div class="row">
+		<label class="control-label {{window.getBsCol(3)}}">База данных: </label>
+		<div class="{{window.getBsCol(4)}}">
+		{{this.model.getFieldValue("db_name")}}</div>
+	</div>
+	<div class="row">
+		<label class="control-label {{window.getBsCol(3)}}">Версия платформы: </label>
+		<div class="{{window.getBsCol(4)}}">
+		{{this.model.getFieldValue("fw_version")}}</div>
+	</div>
+	
+</div>

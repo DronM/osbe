@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Javascript Object Browser</title>
+    <script language="javascript" type="text/javascript">
+	
+    function OnClicked()
+    {
+        var strValue = document.getElementById("txtObject").value;
+    
+        var obj = null;
+        obj = self.document.getElementById(strValue);
+        
+        if( obj == null )
+        {
+            try{obj = eval(strValue);}
+            catch(e) {};
+        }
+        
+        if( obj == null )
+        {
+            alert( "Error: Can not find the control {" + strValue + "}" );
+            return false;            
+        }
+
+		ExpandObject( obj, "divContent");
+    }
+	
+	function ExpandObject( obj, strCtrl)
+	{
+	
+		var strHTML = "<table border='1px' cellspacing='0px' bordercolor='#000000' style='table-layout:fixed; word-break:break-all; word-warp: break-word;' width='100%'><tr><td bgcolor='#EFEF99' width='20%'>Name</td><td bgcolor='#EFEF99' width='70%'>Value</td><td bgcolor='#EFEF99'>Type</td></tr>";
+		
+		document.getElementById(strCtrl).innerHTML = "";
+		for( child in obj)
+		{
+			try
+			{
+				var strTemp = ' ' + obj[child] + ' ';
+				strTemp = strTemp.replace( /&/g, '&amp;');
+				strTemp = strTemp.replace( /"/g, '&quot;');
+				strTemp = strTemp.replace( /</g, '&lt;');
+				strTemp = strTemp.replace( />/g, '&gt;');
+				strTemp = strTemp.replace( /\n/g, '<br/>');	
+				
+				if( typeof(obj[child]) == "object" &&
+					obj[child] != null )
+				{
+					strHTML += "<tr childName='" + child + "' bgcolor='#9999FF' ondblclick='' style='cursor:pointer;'><td>" + child + "</td><td style='padding:10px; width:500px;'>" + strTemp + '&nbsp;</td><td>' + typeof(obj[child]) + '</td></tr>';	
+				}
+				else
+				{
+					strHTML += "<tr><td>" + child + "</td><td style='padding:10px; width:500px;'>" + strTemp + '&nbsp;</td><td>' + typeof(obj[child]) + '</td></tr>';
+				}
+			}
+			catch(e) {}
+		}	
+
+		strHTML += '</table>';
+		
+		
+		document.getElementById(strCtrl).innerHTML = strHTML;
+		 var strValue = document.getElementById("txtObject").value;
+		
+		var aryObjects = document.getElementById(strCtrl).getElementsByTagName("tr");
+		for( var i = 0; i < aryObjects.length; i++)
+		{
+			if( aryObjects[i].getAttribute( "childName" ) == null )
+				continue;
+				
+			aryObjects[i].ondblclick = (function(p, v) 
+				{ 
+					return function()
+					{
+						window.__objSelected = p;
+						self.open(self.location).title = v;
+					};    			
+				}) (obj[aryObjects[i].getAttribute( "childName" )], strValue + "." + aryObjects[i].getAttribute( "childName" ))
+				;
+		}
+		
+		
+	}
+	
+	function OnPageLoad()
+	{
+		if( opener != null &&
+			opener.__objSelected != null )
+		{
+			document.getElementById("txtObject").value = self.title;
+			document.getElementById("btnSearch").style.display = "none";
+			ExpandObject( opener.__objSelected, "divContent");
+		}
+		else if( self.title != null )
+		{
+			document.getElementById("txtObject").value = self.title;
+			OnClicked();
+		}
+	}
+    </script>
+</head>
+<body onload="OnPageLoad();">
+<b>Javascript Object Browser For IE / Firefox</b>
+<hr />
+Object:<input id="txtObject" type="text" size="50" value="window" />
+<input type="button" value="Browse" id="btnSearch" onclick="OnClicked();" />
+<br /><br /><br /><br />
+<div id="divContent" ></div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<div id="MessageQueue" class="panel panel-default {{bsCol}}3">
+	<div id="MessageQueue:head" class="panel-heading" name="head">
+		<div id="MessageQueue:head-cont" name="head-cont">
+			 <div id="MessageQueue:head-cont:btnClose" class="close" aria-label="Close"/>
+		</div>
+	</div>
+	<div id="MessageQueue:body" class="panel-body" name="body">
+		<div id="MessageQueue:content" name="content">
+	
+			<p class="alert alert-warning">
+				<div>05:57:10</div>
+				<div>TEST!!!</div>
+			</p>
+			{{#this.getMessages()}}
+			<p class="">
+				<div>{{this.formatMessage(date_time)}}</div>
+				<div>{{content}}</div>
+			</p>
+			{{/this.getMessages()}}			
+		</div>
+	</div>
+</div>
