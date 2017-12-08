@@ -16,7 +16,7 @@
 function EditInt(id,options){
 	options = options||{};
 	
-	options.type = "number";
+	options.type = options.type || "number";
 	options.validator = options.validator || new ValidatorInt(options);
 
 	options.attrs = options.attrs || {};

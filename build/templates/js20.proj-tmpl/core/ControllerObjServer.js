@@ -171,13 +171,28 @@ ControllerObjServer.prototype.run = function(methId,options){
 }
 
 ControllerObjServer.prototype.download = function(methId,viewId){
+	var n = document.getElementById("file_downloader");
+	if (!n){
+		n = document.createElement("iframe");
+		n.id = "file_downloader";
+		n.style="display:none;";
+	}
 	var params = this.getParams(methId,viewId);
-	var form = $('<form></form>').attr('action', window.getApp().getServConnector().getScript()).attr('method', 'post');
+	var par_str = "";
 	for (var id in params){
-		form.append($("<input></input>").attr('type', 'hidden').attr('name', id).attr('value', params[id]));
+		par_str+= (par_str=="")? "":"&";
+		par_str+= id+"="+params[id];
+	}
+	n.src = window.getApp().getServConnector().getScript()+"?"+par_str;
+	/*
+	var params = this.getParams(methId,viewId);
+	var form = $("<form></form>").attr("action", window.getApp().getServConnector().getScript()).attr("method", "post");
+	for (var id in params){
+		form.append($("<input></input>").attr("type", "hidden").attr("name", id).attr('value', params[id]));
 	}
 
-	form.appendTo('body').submit().remove();
+	form.appendTo("body").submit().remove();
+	*/
 }
 
 ControllerObjServer.prototype.openHref = function(methId,viewId,winParams){

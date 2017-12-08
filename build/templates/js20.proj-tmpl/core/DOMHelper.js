@@ -416,6 +416,16 @@ var DOMHelper = {
 			}
 		}
 	},	
+	lastText:function(n){
+		if (n && n.childNodes){
+			for(var i=n.childNodes.length-1;i>=0;i--){
+				if (n.childNodes[i].nodeType==3){
+					return n.childNodes[i].nodeValue; 
+				}
+			}
+		}
+	},	
+	
 	insertAfter:function(elem, refElem) {
 		var parent = refElem.parentNode;
 		var next = refElem.nextSibling;

@@ -38,6 +38,12 @@ function Login_View(id,options){
 		"events":{"keydown":check_for_enter}
 	}));	
 
+	/*
+	this.addElement(new EditCheckBox(id+":rememberMe",{
+		"html":"<input/>"
+	}));	
+	*/
+	
 	this.addElement(new Button(id+":submit_login",{
 		"caption":this.CTRL_SBM_CAP,
 		"onClick":function(){
@@ -56,6 +62,7 @@ function Login_View(id,options){
 		"bindings":[
 			new DataBinding({"field":pm.getField("name"),"control":this.getElement("user")}),
 			new DataBinding({"field":pm.getField("pwd"),"control":this.getElement("pwd")})
+			//,new DataBinding({"field":pm.getField("rememberMe"),"control":this.getElement("rememberMe")})
 		]		
 	}));
 

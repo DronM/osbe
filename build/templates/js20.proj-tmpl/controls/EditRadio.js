@@ -1,21 +1,23 @@
-/* Copyright (c) 2012 
-	Andrey Mikhalevich, Katren ltd.
-*/
-/*	
-	Description
-*/
-//ф
-/** Requirements
-  * @requires core/extend.js
-  * @requires controls/EditCheckBox.js
-*/
+/**	
+ * @author Andrey Mikhalevich <katrenplus@mail.ru>,2016
 
-/* constructor
-@param string id
-@param object options{
-	@param bool checked or value
-	@param string descr radio description
-*/
+ * @class
+ * @classdesc grid object
+ 
+ * @extends EditString
+
+ * @requires core/extend.js  
+ * @requires controls/WindowQuestion.js
+ * @requires controls/GridHead.js
+ * @requires controls/GridBody.js
+ * @requires controls/GridFoot.js
+ * @requires controls/EditString.js     
+ 
+ * @param {string} id Object identifier
+ * @param {object} options
+ * @param {string} [options.labelClassName=control-label col-lg-11]
+ * @param {string} [options.editContClassName=input-group col-lg-11]
+ */
 function EditRadio(id,options){
 	options = options || {};
 	

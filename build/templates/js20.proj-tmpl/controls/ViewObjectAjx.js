@@ -66,7 +66,7 @@ function ViewObjectAjx(id,options){
 		);
 	}
 
-	if ( options.cmdSave || ((options.cmdSave!=undefined)? options.cmdSave:true) ){
+	if ( options.controlSave || ((options.cmdSave!=undefined)? options.cmdSave:true) ){
 		this.setControlSave(options.controlSave || new ButtonSave(id+":cmdSave",
 			{"onClick":function(){
 				self.onSave();
@@ -141,6 +141,11 @@ ViewObjectAjx.prototype.m_replacedNode;
 ViewObjectAjx.prototype.m_cmd;
 ViewObjectAjx.prototype.m_controller;
 ViewObjectAjx.prototype.m_model;
+
+/**
+ * {bool} updated, {object} newKeys
+ */
+ViewObjectAjx.prototype.m_editResult;
 
 /*{control,controlFieldId,field}*/
 ViewObjectAjx.prototype.m_detailDataSets;
@@ -236,7 +241,9 @@ ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 						val = this.m_dataBindings[i].getControl().getValue();
 					}
 			
-					this.m_dataBindings[i].getControl().setInitValue(val);
+					if (this.m_dataBindings[i].getControl().setInitValue){
+						this.m_dataBindings[i].getControl().setInitValue(val);
+					}
 					f.setValue(val);
 				}
 			}
@@ -253,7 +260,7 @@ ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 					var val;
 					val = ctrl.getValue();
 			
-					if (initControls){
+					if (initControls && ctrl.setInitValue){
 						ctrl.setInitValue(val);
 					}
 					if (val!=null && typeof val == "object" && val.getKeys){
@@ -270,15 +277,19 @@ ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 	}	
 }
 
-ViewObjectAjx.prototype.onOK = function(){
+ViewObjectAjx.prototype.onOK = function(failFunc){
 	var self = this;
-	this.execCommand(this.CMD_OK,function(resp){
-		self.onAfterUpsert(resp,false);
-		self.close(self.m_editResult);
-	});
+	this.execCommand(
+		this.CMD_OK,
+		function(resp){
+			self.onAfterUpsert(resp,false);
+			self.close(self.m_editResult);
+		},
+		failFunc
+	);
 }
 
-ViewObjectAjx.prototype.onSave = function(){	
+ViewObjectAjx.prototype.onSave = function(okFunc,failFunc){	
 	/*
 	var contr = this.getController();
 	var form_cmd = this.getCmd();	
@@ -288,9 +299,20 @@ ViewObjectAjx.prototype.onSave = function(){
 	*/
 	
 	var self = this;
-	this.execCommand(this.CMD_OK,function(resp){
-		self.onSaveOk.call(self,resp);
-	});
+	this.execCommand(
+		this.CMD_OK,
+		function(resp){
+			self.onSaveOk.call(self,resp);
+			if (okFunc){
+				okFunc.call(self);
+			}
+		},
+		failFunc
+	);
+}
+
+ViewObjectAjx.prototype.getModified = function(cmd){
+	return ViewObjectAjx.superclass.getModified.call(this,(cmd)? cmd:this.CMD_OK);
 }
 
 ViewObjectAjx.prototype.onCancel = function(){
@@ -682,6 +704,8 @@ ViewObjectAjx.prototype.setWriteBindings = function(bindings,cmd){
 	if (this.m_model){
 		var bd_ids = [];
 		for (var b_ind=0;b_ind<bindings.length;b_ind++){
+			//bindings[b_ind] && 
+			//console.log("IND="+b_ind)
 			if (bindings[b_ind].getControl()){
 				bd_ids.push(bindings[b_ind].getControl().getName());
 			}

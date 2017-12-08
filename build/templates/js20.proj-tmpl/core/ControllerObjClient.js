@@ -38,7 +38,6 @@ ControllerObjClient.prototype.addInsert = function(){
 			self.m_clientModel.recInsert();
 			if (options.ok){
 				//get all key fields to InsertedId_Model			
-debugger				
 				var key_model_fields = {};
 				var fields = self.m_clientModel.getFields();
 				for (var fid in fields){

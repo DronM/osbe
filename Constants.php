@@ -1,4 +1,6 @@
 <?php
+define('PDF_CMD_TEMPLATE', '/usr/bin/fop/fop -c /usr/bin/fop/conf/conf.xml -q -xml %s -xsl %s -pdf %s');
+
 //data types
 define("DT_INT", 0);
 define("DT_INT_UNSIGNED", 1);

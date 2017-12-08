@@ -102,9 +102,11 @@ EditDate.prototype.setValue = function(val){
 	else{
 		if (this.m_validator){
 			val = this.m_validator.correctValue(val);
-		}
-		this.getNode().value = DateHelper.format(val,this.getDateFormat());	
-		this.applyMask();
+		}		
+		var v = DateHelper.format(val,this.getDateFormat());
+		this.getNode().value = v; 
+		console.log("EditDate.prototype.setValue val="+v)
+		//this.applyMask();
 	}
 }
 

@@ -1,8 +1,8 @@
 <?php
 require_once(FRAME_WORK_PATH.'basic_classes/View.php');
 require_once('common/downloader.php');
-require_once('common/PDFReport.php');
-//ф
+//require_once('common/PDFReport.php');
+
 class ViewPDF extends View{	
 	const ER_TEMPL_NOT_FOUND='Template not found.';
 	const DEF_TEMPL_NAME = 'toPDF';
@@ -17,13 +17,13 @@ class ViewPDF extends View{
 			&& file_exists(
 				USER_VIEWS_PATH.
 				$_REQUEST['templ'].
-				ViewPDF::TEMPL_EXT)){
+				self::TEMPL_EXT)){
 			$templ_name = $_REQUEST['templ'];
-			$templ_path = 'views/';
+			$templ_path = USER_VIEWS_PATH;
 		}
 		else if (file_exists(
 			USER_VIEWS_PATH.
-			$this->getId().ViewPDF::TEMPL_EXT)){
+			$this->getId().self::TEMPL_EXT)){
 			$templ_name = $this->getId();
 			$templ_path = USER_VIEWS_PATH;
 		}
@@ -32,12 +32,14 @@ class ViewPDF extends View{
 			if (!count($pathArray)
 			|| !file_exists(
 				$pathArray[1].'/'.
-				FRAME_WORK_PATH.ViewPDF::DEF_TEMPL_PATH.
-				ViewPDF::DEF_TEMPL_NAME.ViewPDF::TEMPL_EXT)){
-				throw new Exception(ViewPDF::ER_TEMPL_NOT_FOUND);
+				FRAME_WORK_PATH.
+				self::DEF_TEMPL_PATH.
+				self::DEF_TEMPL_NAME.self::TEMPL_EXT)
+			){
+				throw new Exception(self::ER_TEMPL_NOT_FOUND);
 			}
 			$templ_name = ViewPDF::DEF_TEMPL_NAME;
-			//$templ_path = $pathArray[1].'/'.FRAME_WORK_PATH
+			$templ_path = $pathArray[1].'/'.FRAME_WORK_PATH.self::DEF_TEMPL_PATH;
 		}		
 		$xslt_file = $templ_path.$templ_name.ViewPDF::TEMPL_EXT;
 //throw new Exception($xslt_file);
@@ -61,32 +63,24 @@ class ViewPDF extends View{
 		file_put_contents($xml_file,$xml);
 		
 		//FOP
-		$stored_exc = null;
 		try{
 			$out_file = OUTPUT_PATH.$templ_name.".pdf";
-			PDFReport::createFromFile($xml_file, $xslt_file, $out_file);
-		
-		//$out_file = ABSOLUTE_PATH.$out_file;
-		//throw new Exception($xml_file);
-			//download
+			//throw new Exception(sprintf(PDF_CMD_TEMPLATE,$xml_file, $xslt_file, $out_file));
+			exec(sprintf(PDF_CMD_TEMPLATE,$xml_file, $xslt_file, $out_file));
+					
 			if (!file_exists($out_file)){
 				throw new Exception(ViewPDF::ER_FILE_NOT_FOUND);
 			}
-			downloadFile($out_file);
+			downloadFile(
+				$out_file,
+				'application/pdf',
+				(isset($_REQUEST['inline']) && $_REQUEST['inline']=='1')? 'inline;':'attachment;',
+				$templ_name.".pdf"
+			);
+			return TRUE;
 		}
-		catch (Exception $exc) {
-			$stored_exc = $exc;
-		}
-		
-		if (file_exists($xml_file)){
-			//unlink($xml_file);
-		}
-		if (file_exists($out_file)){
-			//unlink($out_file);
-		}
-		
-		if ($stored_exc) {
-			throw($stored_exc);
+		finally{
+			unlink($xml_file);
 		}		
 	}
 }

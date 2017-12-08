@@ -150,11 +150,11 @@ ModelJSON.prototype.initSequences = function(){
  * @param {JSON|string} data
  */
 ModelJSON.prototype.setData = function(data){
-
+/*
 	if (this.getLocked()){
 		throw Error(this.ER_LOCKED);
 	}
-	
+*/	
 	var no_data = false;
 	
 	if (!data){

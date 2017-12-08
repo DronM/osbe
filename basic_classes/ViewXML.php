@@ -1,7 +1,6 @@
 <?php
 require_once(FRAME_WORK_PATH.'basic_classes/View.php');
 
-//ф
 class ViewXML extends View{	
 	public function write(ArrayObject $models){
 		ob_clean();		

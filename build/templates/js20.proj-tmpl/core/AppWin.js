@@ -18,7 +18,7 @@ function AppWin(options){
 	this.m_msg = new WindowMessage();
 	
 	var self = this;
-	window.onerror = function(msg,url,line,col,error){
+	window.onerror = function(msg,url,line,col,error){		
 		self.onError(msg,url,line,col,error);
 	};
 
@@ -82,10 +82,12 @@ AppWin.prototype.onError = function(msg,url,line,col,error) {
 	var d = window.getApp().getServVar("debug");
 	var m_debug = (d=="1" || d===true || d===undefined);
 	var str = msg;
+	//error instanceof ReferenceError
 	if(m_debug){
 		str = str + "\nurl: " + url + "\nline: " + line;
 		if(console){
 			console.log(str);
+			if (error && error.stack)console.log(error.stack);
 			if (console.trace)console.trace();
 		}
 	}

@@ -12,7 +12,7 @@ Edit template instead.
 </xsl:comment>
 <div id="{{{{id}}}}">
 	<div class="row">
-		<h1 class="page-header">{{this.HEAD_TITLE}}</h1>
+		<h1 class="page-header">{{HEAD_TITLE}}</h1>
 	</div>
 </div>
 </xsl:template>

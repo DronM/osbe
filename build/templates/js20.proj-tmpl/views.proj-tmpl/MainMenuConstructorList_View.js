@@ -34,20 +34,10 @@ function MainMenuConstructorList_View(id,options){
 			"elements":[
 				new GridRow(id+":grid:head:row0",{
 					"elements":[
-						new GridCellHead(id+":grid:head:role_id",{
-							"value":this.GRID_ROLE_ID_COL_CAP,
-							"columns":[								
-								new GridColumn("role_id",{
-									"field":model.getField("role_id")
-								})
-							],
-							"sortable":true,
-							"sort":"asc"
-						}),					
 						new GridCellHead(id+":grid:head:role_descr",{
 							"value":this.GRID_ROLE_DESCR_COL_CAP,
 							"columns":[								
-								new EnumGridColumn_role_types("role_descr",{
+								new EnumGridColumn_role_types({
 									"field":model.getField("role_id")
 								})
 							],
@@ -56,7 +46,7 @@ function MainMenuConstructorList_View(id,options){
 						new GridCellHead(id+":grid:head:user_descr",{
 							"value":this.GRID_USER_DESCR_COL_CAP,
 							"columns":[								
-								new GridColumn("user_descr",{
+								new GridColumn({
 									"field":model.getField("user_descr")
 								})
 							],

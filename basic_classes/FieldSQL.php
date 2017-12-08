@@ -200,16 +200,16 @@ class FieldSQL extends Field{
 	}
 		
     public function getValueForDb(){
-		$val = $this->getValue();		
+		$val = $this->getValue();				
 		if (is_null($val)){
-			$val = $this->getDefValueForDb();
+			$val = $this->getDefValueForDb();			
 		}
 		if (is_null($val)){
 			$val = 'null';
-		}
+		}		
 		return $val;
     }
-    public function getDefValueForDb(){
+    public function getDefValueForDb(){    
 		return $this->getDefaultValue();
     }
     public function getValueForView(){

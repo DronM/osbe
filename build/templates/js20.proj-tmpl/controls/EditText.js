@@ -26,7 +26,7 @@ function EditText(id,options){
 extend(EditText,EditString);
 
 /* constants */
-EditText.prototype.DEF_TAG_NAME = 'textarea';
+EditText.prototype.DEF_TAG_NAME = "TEXTAREA";
 EditText.prototype.DEF_ROWS = "5";
 
 EditText.prototype.setRows = function(rows){

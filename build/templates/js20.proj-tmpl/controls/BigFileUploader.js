@@ -92,7 +92,7 @@ function BigFileUploader(id,options){
 		
 	this.m_resumable = new Resumable({
 		"target": options.target || "functions/upload.php",
-		"testChunks": true,
+		"testChunks": true,		
 		"fileType":[],
 		"maxFilesErrorCallback":function(files, errorCount){
 			var maxFiles = $.getOpt('maxFiles');
@@ -159,7 +159,7 @@ function BigFileUploader(id,options){
 		l.toDOM();
 		self.progressFileAdded();
 	}); 	
-	this.m_resumable.on("fileSuccess", function(message, file){
+	this.m_resumable.on("fileSuccess", function(file,message){
 		//mark file finished
 		//mark file
 		var imgs = DOMHelper.getElementsByAttr("file-upload-mark",self.m_node,"class",false,"img");

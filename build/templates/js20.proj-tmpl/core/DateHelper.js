@@ -126,12 +126,12 @@ var DateHelper = {
 			var s = arg.toString();
 			return ((s.length<2)? "0":"")+s;
 		};
-		
+		/*
 		if (!dt){
 			dt = this.time();
 		}
-		
-		if (!dt.getDate){
+		*/
+		if (!dt || !dt.getDate){
 			throw Error("DateHelper.format Invalid date "+dt);
 		}
 		
@@ -257,6 +257,17 @@ var DateHelper = {
 	yearEnd : function(dt) {
 		if(!dt)dt = this.time();
 		return new Date(dt.getFullYear(), 12, 0);
-	}
+	},
+	
+	// https://github.com/lsmith/addBusinessDays/blob/master/addBusinessDays.js
+	// var d = new Date();
+	// addBusinessDays(d, numberOfDays);
+
+	addBusinessDays : function(d,n) {
+	    d = new Date(d.getTime());
+	    var day = d.getDay();
+	    d.setDate(d.getDate() + n + (day === 6 ? 2 : +!day) + (Math.floor((n - 1 + (day % 6 || 1)) / 5) * 2));
+	    return d;
+	}	
 		
 }

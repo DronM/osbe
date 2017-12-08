@@ -17,18 +17,24 @@
 	lastBuild tag occures only once and contains last building timestamp
 	Every version tag has dateOpen - when version was started and when it was finished
 -->
-<!ELEMENT versions (lastBuild,version+)>
+<!ELEMENT versions (version+)>
 <!ELEMENT lastBuild (#PCDATA)>
 <!ELEMENT version (#PCDATA)>
 <!ATTLIST version dateOpen CDATA #REQUIRED>
 <!ATTLIST version dateClose CDATA #IMPLIED>
-
 
 <!-- Global filters are enlisted here as fields
 -->
 <!ELEMENT globalFilters (field+)>
 <!ELEMENT globalFilter EMPTY>
 <!ATTLIST globalFilter id CDATA #REQUIRED>
+
+
+<!-- package system
+-->
+<!ELEMENT packages (package+)>
+<!ELEMENT package EMPTY>
+<!ATTLIST package id CDATA #REQUIRED>
 
 
 <!-- Project enumerations
@@ -68,6 +74,7 @@
 <!ATTLIST model virtual (TRUE|FALSE) "TRUE">
 <!ATTLIST model modelType (CAT|DOC|DOCT|DOCTF|RG|RA) "CAT">
 <!ATTLIST model masterModel CDATA #IMPLIED>
+<!ATTLIST model baseModelId CDATA #IMPLIED>
 <!ATTLIST model docTypeId CDATA #IMPLIED>
 <!ATTLIST model regTypeId CDATA #IMPLIED>
 <!ATTLIST model lastRowSelectOnInit (TRUE|FALSE) #IMPLIED>
@@ -168,6 +175,7 @@
 <!ATTLIST view defaultValue (TRUE|FALSE) #IMPLIED>
 <!ATTLIST view cmd (alt|del|add) #IMPLIED>
 
+
 <!ELEMENT serverTemplates (serverTemplate+)>
 <!ELEMENT serverTemplate EMPTY>
 <!ATTLIST serverTemplate id CDATA #REQUIRED>
@@ -178,6 +186,11 @@
 <!ELEMENT jsTemplate EMPTY>
 <!ATTLIST jsTemplate id CDATA #REQUIRED>
 <!ATTLIST jsTemplate file CDATA #REQUIRED>
+
+
+<!ELEMENT sqlScripts (sqlScript+)>
+<!ELEMENT sqlScript EMPTY>
+<!ATTLIST sqlScript file CDATA #REQUIRED>
 
 
 <!ELEMENT jsScripts (jsScript+)>

@@ -6,29 +6,26 @@
 			doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" 
 			doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
 
-<xsl:template match="enums/enum"><![CDATA[]]>/* Copyright (c) 2016
-	Andrey Mikhalevich, Katren ltd.
-*/
-/*	
-	Description
-*/
-/** Requirements
+<xsl:template match="enums/enum"><![CDATA[]]>/**
+ * @author Andrey Mikhalevich &lt;katrenplus@mail.ru>, 2017
+ * @class
+ * @classdesc Grid column Enumerator class. Created from template build/templates/js/EnumGridColumn_js.xsl. !!!DO NOT MODIFY!!!
+ 
+ * @extends GridColumnEnum
+ 
  * @requires core/extend.js
-*/
-
-/* constructor
-@param string id
-@param object options{
-}
-*/
+ * @requires controls/GridColumnEnum.js
+ 
+ * @param {object} options
+ */
 <xsl:variable name="enum_id" select="concat('EnumGridColumn_',@id)"/>
-function <xsl:value-of select="$enum_id"/>(id,options){
+function <xsl:value-of select="$enum_id"/>(options){
 	options = options || {};
 	
 	options.multyLangValues = {};
 	<xsl:apply-templates select="value"/>
 	
-	<xsl:value-of select="$enum_id"/>.superclass.constructor.call(this,id,options);
+	<xsl:value-of select="$enum_id"/>.superclass.constructor.call(this,options);
 	
 }
 extend(<xsl:value-of select="$enum_id"/>,GridColumnEnum);

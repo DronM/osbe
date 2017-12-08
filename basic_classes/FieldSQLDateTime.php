@@ -19,6 +19,9 @@ class FieldSQLDateTime extends FieldSQL{
 	
     public function getValueForDb(){
 		$val = parent::getValueForDb();		
+		if (strtolower($val)=='now()' || strtolower($val)=='current_timestamp'){
+			return $val;
+		}
 		return $this->formatVal($val);
     }
     public function getOldValueForDb(){

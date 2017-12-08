@@ -57,6 +57,7 @@ Description
 ViewAjx.prototype.onGetData = function(resp,cmd){	
 	var models = {};
 	for (var i=0;i<this.m_dataBindings.length;i++){
+	//console.log("dataBindings i="+i)
 		var m = this.m_dataBindings[i].getModel();		
 		var m_id = m.getId();
 		if (models[m_id]==undefined && resp && resp.modelExists(m_id)){
@@ -73,6 +74,7 @@ ViewAjx.prototype.onGetData = function(resp,cmd){
 		if (models[m_id]>0){	
 			var ctrl = this.m_dataBindings[i].getControl();
 			if (ctrl){
+			//console.log("Got control")
 				var init_val = null;
 				var ctrl_format_f = (ctrl.getFormatFunction)? ctrl.getFormatFunction():null;
 				
@@ -80,15 +82,23 @@ ViewAjx.prototype.onGetData = function(resp,cmd){
 					init_val = ctrl_format_f.call(ctrl,this.m_dataBindings[i].getModel().getFields());
 				}
 				else{
+					//debugger;
 					this.defineField(i);
-					if (this.m_dataBindings[i].getField() && !(cmd=="copy" && f.getPrimaryKey()) ){
-						//debugger;
+					//console.log("ViewAjx.prototype.onGetData defineField")
+					if (this.m_dataBindings[i].getField() && !(cmd=="copy" && f.getPrimaryKey()) ){						
 						init_val = this.m_dataBindings[i].getField().getValue();						
+						//console.log("ViewAjx.prototype.onGetData init_val="+init_val)
 					}			
 				}
 				
 				if (init_val && (!ctrl.getIsRef || !ctrl.getIsRef()) ){
-					ctrl.setInitValue(init_val);				
+					if (ctrl.setInitValue){
+						ctrl.setInitValue(init_val);
+					}
+					else{
+						//simple none edit controls
+						ctrl.setValue(init_val);
+					}
 				}
 				else if (ctrl.getIsRef && ctrl.getIsRef() && this.m_dataBindings[i].getKeyIds()){
 					var init_val_o;
@@ -136,7 +146,7 @@ ViewAjx.prototype.setTempDisabled = function(cmd){
 			this.m_controlStates[cmd].push({
 				"ctrl":ctrl,
 				"enabled":ctrl.getEnabled(),
-				"inputEnabled":ctrl.getInputEnabled()
+				"inputEnabled":(ctrl.getInputEnabled)? ctrl.getInputEnabled():true
 			});
 			ctrl.setEnabled(false);
 		}	
@@ -155,7 +165,9 @@ ViewAjx.prototype.setTempEnabled = function(cmd){
 			if (this.m_controlStates[cmd][i].enabled){
 				this.m_controlStates[cmd][i].ctrl.setEnabled(true);
 			}
-			this.m_controlStates[cmd][i].ctrl.setInputEnabled(this.m_controlStates[cmd][i].inputEnabled);
+			if (this.m_controlStates[cmd][i].ctrl.setInputEnabled){
+				this.m_controlStates[cmd][i].ctrl.setInputEnabled(this.m_controlStates[cmd][i].inputEnabled);
+			}
 		}
 	}
 }
@@ -212,10 +224,9 @@ ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
 			else if (!f){
 				throw Error(CommonHelper.format(this.ER_CTRL_NOT_BOUND,Array(ctrl.getName())));	
 			}
-						
-			if (ctrl.getModified()){
+			if (ctrl.getModified && ctrl.getModified()){
 				//is it an object field?
-				if (ctrl.getIsRef()){			
+				if (ctrl.getIsRef && ctrl.getIsRef()){			
 					//reference field with keys					
 					var keyIds = ctrl.getKeyIds();
 					if (keyIds.length>=1){
@@ -243,7 +254,7 @@ ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
 					}							
 				}
 			}
-			else if (ctrl.isNull() && (ctrl.getRequired() || f.getValidator().getRequired())){
+			else if (ctrl.isNull && ctrl.isNull() && (ctrl.getRequired() || f.getValidator().getRequired())){
 				ctrl.setNotValid(f.getValidator().ER_EMPTY);
 				incorrect_vals = true;				
 			}

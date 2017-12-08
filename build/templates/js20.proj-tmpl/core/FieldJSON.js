@@ -28,6 +28,7 @@ FieldJSON.prototype.setValue = function(id,v){
 		this.m_value = id;	
 	}
 	else if (!v && typeof(id)=="string"){
+	//console.log("FieldJSON.prototype.setValue ID="+this.getId()+" String="+id)
 		this.m_value = CommonHelper.unserialize(id);	
 	}
 	else if (v){

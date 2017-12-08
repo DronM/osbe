@@ -36,7 +36,7 @@ function EditRadioGroupRef(id,options){
 	
 	if (options.modelDataStr && this.m_model){		
 		if (this.getCashable()){
-			this.getApp().setCashData(this.m_model.getId(),options.modelDataStr);
+			window.getApp().setCashData(this.m_model.getId(),options.modelDataStr);
 		}
 		else{
 			this.m_model.setDate(options.modelDataStr);
@@ -139,7 +139,7 @@ EditRadioGroupRef.prototype.setColCount = function(v){
 
 EditRadioGroupRef.prototype.onRefresh = function(){	
 	if (this.getCashable() && this.m_model){
-		var cash = this.getApp().getCashData(this.getName());
+		var cash = window.getApp().getCashData(this.getName());
 		if (cash){
 			this.m_model.setDate(cash);
 			this.onGetData();
@@ -157,7 +157,7 @@ EditRadioGroupRef.prototype.onRefresh = function(){
 		},
 		"fail":function(resp,erCode,erStr){
 			self.setEnabled(self.m_oldEnabled);
-			self.getErrorControl().setValue(self.getApp().formatError(erCode,erStr));
+			self.getErrorControl().setValue(window.getApp().formatError(erCode,erStr));
 		}
 	});
 }
@@ -176,7 +176,7 @@ EditRadioGroupRef.prototype.onGetData = function(resp){
 		this.m_model.setData(resp.getModelData(this.m_model.getId()));
 		
 		if (this.getCashable()){
-			this.getApp().setCashData(this.m_model.getId(),resp.getModelData(this.m_model.getId()));
+			window.getApp().setCashData(this.m_model.getId(),resp.getModelData(this.m_model.getId()));
 		}
 	}
 	
@@ -240,7 +240,6 @@ EditRadioGroupRef.prototype.onGetData = function(resp){
 			"className":"a",
 			"value":this.getNotSelectedValue(),
 			"labelCaption":this.getNotSelectedCaption(),
-			"app":this.getApp(),
 			"name":this.getId(),
 			"events":{"onclick":function(){
 				if (self.m_onSelect){
@@ -263,7 +262,6 @@ EditRadioGroupRef.prototype.onGetData = function(resp){
 			"checked":(key_val==old_key_val),
 			"value":key_val,
 			"labelCaption":this.getDescrField().getValue(),
-			"app":this.getApp(),
 			"name":this.getId(),
 			"events":{"click":function(){
 				if (self.m_onSelect){
@@ -294,7 +292,7 @@ EditRadioGroupRef.prototype.onGetData = function(resp){
 	/*!!! В НЕСКОЛЬКО КОЛОНОК!!! */
 	var columns = [];	
 	var col_w = 12/this.m_colCount;
-	var bs = this.getApp().getBsCol()+col_w;
+	var bs = window.getApp().getBsCol()+col_w;
 	for (var n=0;n<this.m_colCount;n++){
 		columns.push(new Control(CommonHelper.uniqid(),"div",{"className":bs}));
 	}

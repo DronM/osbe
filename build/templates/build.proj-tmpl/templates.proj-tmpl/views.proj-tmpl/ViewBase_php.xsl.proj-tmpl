@@ -19,7 +19,9 @@ class ViewBase extends ViewHTMLXSLT {
 	protected function addMenu(&amp;$models){
 		if (isset($_SESSION['role_id'])){
 			$menu_class = 'MainMenu_Model_'.$_SESSION['role_id'];
-			$models['mainMenu'] = new $menu_class();
+			if (class_exists($menu_class,FALSE)){
+				$models['mainMenu'] = new $menu_class();
+			}
 		}	
 	}
 	
@@ -55,20 +57,30 @@ class ViewBase extends ViewHTMLXSLT {
 				$script_id = VERSION;
 			}			
 		}
-		<!-- custom vars definitions
+		<!-- custom vars definitions-->
 		$this->getVarModel()->addField(new Field('role_id',DT_STRING));
-		-->
+		$this->getVarModel()->addField(new Field('user_name',DT_STRING));
+		
 		
 		<!-- obligatory vars values -->
 		$this->getVarModel()->insert();
 		$this->setVarValue('scriptId',$script_id);
-		$this->setVarValue('basePath',BASE_PATH);		
+		$this->setVarValue('basePath','http://'.$_SERVER['HTTP_HOST'].'/'.APP_DIR.'/');//BASE_PATH
 		$this->setVarValue('version',VERSION);		
+		$this->setVarValue('debug',DEBUG);
 		if (isset($_SESSION['locale_id'])){
 			$this->setVarValue('locale_id',$_SESSION['locale_id']);
 		}
 		else if (!isset($_SESSION['locale_id']) &amp;&amp; defined('DEF_LOCALE')){
 			$this->setVarValue('locale_id', DEF_LOCALE);
+		}		
+		
+		if (isset($_SESSION['role_id'])){
+			$this->setVarValue('role_id',$_SESSION['role_id']);
+			$this->setVarValue('user_name',$_SESSION['user_name']);
+			$this->setVarValue('curDate',round(microtime(true) * 1000));
+			//$this->setVarValue('token',$_SESSION['token']);
+			//$this->setVarValue('tokenr',$_SESSION['tokenr']);
 		}
 		<!-- custom vars values
 		if (isset($_SESSION['constrain_to_store'])){
@@ -111,10 +123,26 @@ class ViewBase extends ViewHTMLXSLT {
 <xsl:template match="constants/constant[@autoload='TRUE']">
 <xsl:if test="position() &gt; 1">,</xsl:if>'<xsl:value-of select="@id"/>'</xsl:template>
 			
-<xsl:template match="enum/value">require_once('models/MainMenu_Model_<xsl:value-of select="@id"/>.php');</xsl:template>
+<xsl:template match="enum/value">
+if (file_exists('models/MainMenu_Model_<xsl:value-of select="@id"/>.php')){
+require_once('models/MainMenu_Model_<xsl:value-of select="@id"/>.php');
+}</xsl:template>
 
-<xsl:template match="jsScripts/jsScript">$this->addJsModel(new ModelJavaScript(USER_JS_PATH.'<xsl:value-of select="@file"/>'));</xsl:template>
+<xsl:template match="jsScripts/jsScript">
+<xsl:choose>
+<xsl:when test="@resource">
+	if (
+	(isset($_SESSION['locale_id']) &amp;&amp; $_SESSION['locale_id']=='<xsl:value-of select="@resource"/>')
+	||
+	(!isset($_SESSION['locale_id']) &amp;&amp; DEF_LOCALE=='<xsl:value-of select="@resource"/>')
+	){
+		$this->addJsModel(new ModelJavaScript(USER_JS_PATH.'<xsl:value-of select="@file"/>'));
+	}
+</xsl:when>
+<xsl:otherwise>$this->addJsModel(new ModelJavaScript(USER_JS_PATH.'<xsl:value-of select="@file"/>'));</xsl:otherwise>
+</xsl:choose>
+</xsl:template>
 
-<xsl:template match="cssScripts/cssScript">$this->addCssModel(new ModelStyleSheet(USER_CSS_PATH.'<xsl:value-of select="@file"/>'));</xsl:template>
+<xsl:template match="cssScripts/cssScript">$this->addCssModel(new ModelStyleSheet(USER_JS_PATH.'<xsl:value-of select="@file"/>'));</xsl:template>
 
 </xsl:stylesheet>

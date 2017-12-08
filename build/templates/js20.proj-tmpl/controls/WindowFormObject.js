@@ -8,7 +8,12 @@
  * @requires core/extend.js
  * @requires controls/WindowForm.js     
   
- * @param {Object} options
+ * @param {object} options
+ * @param {Controller} options.controller
+ * @param {object} options.keys
+ * @param {string} [options.view=Child]
+ * @param {string} options.method
+ * @param {string} options.template   
  */
 function WindowFormObject(options){
 	options = options || {};	
@@ -17,9 +22,9 @@ function WindowFormObject(options){
 		throw Error(this.ER_NO_METHOD);
 	}
 	*/
-//window.getApp()	
-	options.host = options.host || options.app.getHost();
-	options.script = options.script || options.app.getScript();
+//window.getApp() options.app	
+	options.host = options.host || window.getApp().getHost();
+	options.script = options.script || window.getApp().getScript();
 	options.URLParams = options.URLParams || "";
 	
 	if (options.formName){

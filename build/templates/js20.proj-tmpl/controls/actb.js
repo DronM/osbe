@@ -38,13 +38,7 @@ function getElement(evt){
 		return evt.currentTarget;
 	}
 }
-function getTargetElement(evt){
-	if (window.event){
-		return window.event.srcElement;
-	}else{
-		return evt.target;
-	}
-}
+
 function stopSelect(obj){
 	if (typeof obj.onselectstart != 'undefined'){
 		EventHelper.add(obj,"selectstart",function(){ return false;});
@@ -116,25 +110,7 @@ String.prototype.addslashes = function(){
 String.prototype.trim = function () {
     return this.replace(/^\s*(\S*(\s+\S+)*)\s*$/, "$1");
 };
-function curTop(obj){
-	toreturn = 0;
-	while(obj){
-		toreturn += obj.offsetTop;
-		obj = obj.offsetParent;
-	}
-	return toreturn;
-}
-function curLeft(obj){
-	toreturn = 0;
-	while(obj){
-		toreturn += obj.offsetLeft;
-		obj = obj.offsetParent;
-	}
-	return toreturn;
-}
-function isNumber(a) {
-    return typeof a == 'number' && isFinite(a);
-}
+
 function replaceHTML(obj,text,winDocum){
 	while(el = obj.childNodes[0]){
 		obj.removeChild(el);
@@ -430,7 +406,7 @@ function actb(obj,winObj,servConnect){
 	this.actb_hColor = '#000000';
 	this.actb_fFamily = 'Verdana';
 	this.actb_fSize = '11px';
-	//this.actb_hStyle = 'text-decoration:underline;font-weight="bold"';
+	this.actb_hStyle = 'text-decoration:underline;font-weight="bold"';
 	/* --- Styles --- */
 
 	/* ---- Private Variables ---- */
@@ -560,36 +536,20 @@ function actb(obj,winObj,servConnect){
 		
 		unfocus_cur_table();
 		
-		var a_cont = winDocum.createElement("div");
+		var a_cont = winDocum.createElement("UL");
 		a_cont.id = 'tat_table';
-		a_cont.className = "popover";
-		a_cont.setAttribute("role","tooltip");
+		a_cont.className = "dropdown-menu";//popover
+		//a_cont.setAttribute("role","tooltip");
 		a_cont.style.position="absolute";
-		a_cont.style.top = eval(curTop(actb_curr) + actb_curr.offsetHeight) + "px";
-		a_cont.style.left = curLeft(actb_curr) + "px";
+		a_cont.style.zIndex = "1060";
+		a_cont.style.top = ($(actb_curr).offset().top+$(actb_curr).outerHeight())+"px";		
+		a_cont.style.left = $(actb_curr).offset().left+"px";
+		
 		a_cont.style.display = "block";
 		
-		a_cont_t = document.createElement("div");
-		a_cont_t.className = "tooltip-arrow";
-		a_cont_c = document.createElement('div');
-		a_cont_c.className = "popover-content";
-		
-		a = winDocum.createElement("table");
-		a.className = "table table-hover act";
-		//a.cellSpacing='1px';
-		//a.cellPadding='2px';
-		//a.style.position='absolute';
-		//a.style.top = eval(curTop(actb_curr) + actb_curr.offsetHeight) + "px";
-		//a.style.left = curLeft(actb_curr) + "px";
-		//a.style.backgroundColor=actb_self.actb_bgColor;
-		//a.style.zIndex="9999";
-		//a.id = 'tat_table';
-		
-		a_cont_c.appendChild(a);
-		a_cont.appendChild(a_cont_t);
-		a_cont.appendChild(a_cont_c);		
-		winDocum.body.appendChild(a_cont);
-		
+		a = winDocum.createElement("LI");
+		//a.className = "table table-hover act";
+				
 		var i;
 		var first = true;
 		var j = 1;
@@ -599,9 +559,9 @@ function actb(obj,winObj,servConnect){
 		}
 		var counter = 0;
 		for (i=0;i<actb_self.actb_keywords.length;i++){
+			var c;
 			if (actb_bool[i]){
 				counter++;
-				r = a.insertRow(-1);
 				if (first && !actb_tomake){
 					//r.style.backgroundColor = actb_self.actb_hColor;
 					first = false;
@@ -613,8 +573,8 @@ function actb(obj,winObj,servConnect){
 				}else{
 					//r.style.backgroundColor = actb_self.actb_bgColor;
 				}
-				r.id = 'tat_tr'+(j);
-				c = r.insertCell(-1);
+				c = winDocum.createElement("A");
+				c.setAttribute("href","#");
 				//c.style.color = actb_self.actb_textColor;
 				//c.style.fontFamily = actb_self.actb_fFamily;
 				//c.style.fontSize = actb_self.actb_fSize;				
@@ -624,26 +584,34 @@ function actb(obj,winObj,servConnect){
 				if (actb_self.actb_mouse){
 					c.style.cursor = 'pointer';
 					c.onclick=actb_mouseclick;
-					c.onmouseover = actb_table_highlight;
+					//c.onmouseover = actb_table_highlight;
 				}
 				j++;
+				
+				a.appendChild(c);		
 			}
 			if (j - 1 == actb_self.actb_lim && j < actb_total){
-				r = a.insertRow(-1);
 				//r.style.backgroundColor = actb_self.actb_bgColor;
-				c = r.insertCell(-1);
+				
+				c = winDocum.createElement("A");
+				c.setAttribute("href","#");
+
 				//c.style.color = actb_self.actb_textColor;
 				//c.style.fontFamily = 'arial narrow';
 				//c.style.fontSize = actb_self.actb_fSize;
-				c.align='center';
 				replaceHTML(c,'\\/',winDocum);
 				if (actb_self.actb_mouse){
 					c.style.cursor = 'pointer';
 					c.onclick = actb_mouse_down;
 				}
+				a.appendChild(c);
 				break;
 			}
 		}
+		
+		a_cont.appendChild(a);		
+		winDocum.body.appendChild(a_cont);
+		
 		actb_rangeu = 1;
 		actb_ranged = j-1;
 		actb_display = true;

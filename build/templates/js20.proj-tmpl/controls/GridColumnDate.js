@@ -38,5 +38,5 @@ GridColumnDate.prototype.DEF_FORMAT = "d/m/Y";
 
 /* public methods */
 GridColumnDate.prototype.formatVal = function(v){
-	return DateHelper.format(v, this.m_dateFormat);
+	return (v)? DateHelper.format(v, this.m_dateFormat):"";
 }

@@ -34,7 +34,7 @@ try{
 		$port = (defined('DB_PORT'))? DB_PORT:NULL;
 		$dbLink->connect(DB_SERVER,DB_USER,DB_PASSWORD,$port);		
 	}
-	
+
 	/* ******************** Token Authorization ************************* */
 	if (defined('PARAM_TOKEN') && isset($_REQUEST[PARAM_TOKEN])){
 		$token = $_REQUEST[PARAM_TOKEN]; 
@@ -68,7 +68,7 @@ try{
 
 		session_id($session_ar['session_id']);
 	}
-	
+
 	/*no token and no method or method is not in NO_TOKEN_METHODS
 	if (!isset($token) && (!isset($_REQUEST[PARAM_METHOD]) || !in_array($_REQUEST[PARAM_METHOD],explode(',',TOKEN_NO_TOKEN_METHODS))) ){
 		throw new Exception(ERR_AUTH_NOT_LOGGED);
@@ -107,7 +107,7 @@ try{
 	if (!isset($_SESSION['scriptId'])){
 		$_SESSION['scriptId'] = md5(session_id());
 	}
-	
+
 	//*****************************
 	//default page params
 	if (!isset($_SESSION['LOGGED'])){			
@@ -175,7 +175,6 @@ try{
 			throw new Exception(ERR_COM_NO_VIEW);
 		}	
 	}
-
 	$view_class = $view;
 	if (!file_exists($v_script=USER_VIEWS_PATH.$view.'.php')){	
 		$pathArray = explode(PATH_SEPARATOR, get_include_path());	
@@ -223,6 +222,7 @@ catch (Exception $e){
 				$pathArray[1].'/'.FRAME_WORK_PATH.'basic_classes/'.$view.'.php' :
 				USER_VIEWS_PATH.$view.'.php';
 		}
+		//throw new Exception('v_script='.$v_script);
 		require_once($v_script);		
 	}
 	

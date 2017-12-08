@@ -16,8 +16,6 @@ function ViewList_View(id,options){
 	
 	ViewList_View.superclass.constructor.call(this,id,options);
 	
-	ViewList_View.superclass.constructor.call(this,id,options);
-	
 	var model = options.models.ViewList_Model;
 	var contr = new View_Controller();
 	

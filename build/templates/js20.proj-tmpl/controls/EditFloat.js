@@ -17,6 +17,8 @@ function EditFloat(id,options){
 	options = options || {};
 	options.validator = options.validator || new ValidatorFloat(options);
 	
+	options.cmdSelect = false;
+	
 	this.m_precision = options.precision || this.DEF_PRECISION;
 	
 	EditFloat.superclass.constructor.call(this,id,options);

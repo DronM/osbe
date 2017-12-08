@@ -11,7 +11,7 @@
 	define('REPO_DIR',realpath(dirname(__FILE__)));
 	define('BUILD_LOG','build.log');	
 	
-	require_once(realpath(REPO_DIR."/../../common/Logger.php"));
+	require_once('Logger.php');
 	
 	//commands
 	define('SBMT_OPEN_VERS','open_version');
@@ -94,6 +94,7 @@
 		$log->dump();
 		
 		echo '<a href="index.php">Main</a>';
+		echo '<a href="package.php">Package manager</a>';
 	}
 	else if (isset($_REQUEST[SBMT_MIN_JS])){
 		$struc = array();
@@ -114,6 +115,7 @@
 		print_log($log);
 		$log->dump();			
 		echo '<a href="index.php">Main</a>';
+		echo '<a href="package.php">Package manager</a>';
 	}
 	else if (isset($_REQUEST[SBMT_BUILD_JSDOC])){
 		try{
@@ -125,6 +127,7 @@
 		print_log($log);
 		$log->dump();			
 		echo '<a href="index.php">Main</a>';
+		echo '<a href="package.php">Package manager</a>';
 	}
 	else if (isset($_REQUEST[SBMT_DTD_VALID])){
 		try{
@@ -136,6 +139,7 @@
 		print_log($log);
 		$log->dump();			
 		echo '<a href="index.php">Main</a>';
+		echo '<a href="package.php">Package manager</a>';
 	}	
 	else if (isset($_REQUEST[SBMT_CREATE_SYMLINKS])){
 		$proj_man->createSymlinks($log);
@@ -185,6 +189,8 @@
 		echo "<h4>Metadata file is not found.</h4>";
 	}
 	else{
+		echo '<a href="package.php">Package manager</a>';
+		
 		$struc = array();
 		$proj_man->getVersion($struc);
 

@@ -19,49 +19,49 @@ Edit template instead.
 </xsl:comment>
 <div id="{{{{id}}}}">
 	<div class="row">
-		<label class="control-label {{{{window.getBsCol(5)}}}}">
-		{{this.LB_APP_NAME}}</label>
-		<div class="{{{{window.getBsCol(4)}}}}">
-		{{this.model.getFieldValue("app_name")}}</div>
+		<label class="control-label {{{{bsCol}}}}5">
+		{{LB_APP_NAME}}</label>
+		<div class="{{{{bsCol}}}}4">
+		{{app_name}}</div>
 	</div>
 	<div class="row">
-		<label class="control-label {{{{window.getBsCol(5)}}}}">
-		{{this.LB_VERSION}}</label>
-		<div class="{{{{window.getBsCol(4)}}}}">
-		{{this.model.getFieldValue("app_version")}}</div>
-	</div>
-
-	<div class="row">
-		<label class="control-label {{{{window.getBsCol(5)}}}}">
-		{{this.LB_AUTHOR}}</label>
-		<div class="{{{{window.getBsCol(4)}}}}">
-		{{this.model.getFieldValue("author")}}</div>
+		<label class="control-label {{{{bsCol}}}}5">
+		{{LB_VERSION}}</label>
+		<div class="{{{{bsCol}}}}4">
+		{{app_version}}</div>
 	</div>
 
 	<div class="row">
-		<label class="control-label {{{{window.getBsCol(5)}}}}">
-		{{this.LB_TECH_MAIL}}</label>
-		<div class="{{{{window.getBsCol(4)}}}}">
-		{{this.model.getFieldValue("tech_mail")}}</div>
+		<label class="control-label {{{{bsCol}}}}5">
+		{{LB_AUTHOR}}</label>
+		<div class="{{{{bsCol}}}}4">
+		{{author}}</div>
+	</div>
+
+	<div class="row">
+		<label class="control-label {{{{bsCol}}}}5">
+		{{LB_TECH_MAIL}}</label>
+		<div class="{{{{bsCol}}}}4">
+		{{tech_mail}}</div>
 	</div>
 	
 	<div class="row">
-		<label class="control-label {{{{window.getBsCol(5)}}}}">
-		{{this.LB_DB_NAME}}</label>
-		<div class="{{{{window.getBsCol(4)}}}}">
-		{{this.model.getFieldValue("db_name")}}</div>
+		<label class="control-label {{{{bsCol}}}}5">
+		{{LB_DB_NAME}}</label>
+		<div class="{{{{bsCol}}}}4">
+		{{db_name}}</div>
 	</div>
 	<div class="row">
-		<label class="control-label {{{{window.getBsCol(5)}}}}">
-		{{this.LB_FW_SERVER_VERSION}}</label>
-		<div class="{{{{window.getBsCol(4)}}}}">
-		{{this.model.getFieldValue("fw_version")}}</div>
+		<label class="control-label {{{{bsCol}}}}5">
+		{{LB_FW_SERVER_VERSION}}</label>
+		<div class="{{{{bsCol}}}}4">
+		{{fw_version}}</div>
 	</div>
 	<div class="row">
-		<label class="control-label {{{{window.getBsCol(5)}}}}">
-		{{this.LB_FW_CLIENT_VERSION}}</label>
-		<div class="{{{{window.getBsCol(4)}}}}">
-		{{window.getApp().VERSION}}</div>
+		<label class="control-label {{{{bsCol}}}}5">
+		{{LB_FW_CLIENT_VERSION}}</label>
+		<div class="{{{{bsCol}}}}4">
+		{{VERSION}}</div>
 	</div>
 </div>
 </xsl:template>

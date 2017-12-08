@@ -20,5 +20,5 @@ $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
 ALTER FUNCTION logins_process()
-  OWNER TO crm;
+  OWNER TO ;
 

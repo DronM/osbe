@@ -209,6 +209,7 @@ var CommonHelper = {
 	unserialize:function(json_string){
 		//return this.json2obj(json_string);
 		//console.log("unserialize="+json_string)
+		//console.log("json_string="+json_string)
 		return (json_string)? JSON.parse(json_string,function(key,val){
 			//console.log("Key="+key+" val="+CommonHelper.var_export(val));
 			//return val;

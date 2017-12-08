@@ -48,7 +48,7 @@
 </xsl:template>
 
 <xsl:template match="metadata">
-	<xsl:apply-templates select="enums/enum"/>
+	<xsl:apply-templates select="enums/enum[@cmd=$CMD_CREATE or @cmd=$CMD_ALTER or @cmd=$CMD_DROP or @cmd=$CMD_RENAME]"/>
 		
 	<xsl:apply-templates select="models/model[@virtual='FALSE']"/>
 	<xsl:call-template name="common_functions"/>
@@ -1078,8 +1078,31 @@ ALTER FUNCTION <xsl:value-of select="$open_period_prototype"/> OWNER TO <xsl:val
 		<xsl:otherwise><xsl:value-of select="@id"/></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>	
+	<xsl:variable name="func">enum_<xsl:value-of select="$enum_id"/>_val(<xsl:value-of select="$enum_id"/>,locales)</xsl:variable>
+	<!-- function-->
 	<xsl:choose>
 		<xsl:when test="@cmd=$CMD_DROP">
+		DROP FUNCTION <xsl:value-of select="$func"/>;
+		</xsl:when>
+		<xsl:otherwise>
+		/* function */
+		CREATE OR REPLACE FUNCTION <xsl:value-of select="$func"/>
+		RETURNS text AS $$
+			SELECT
+			CASE
+			<xsl:for-each select="value/*">WHEN $1='<xsl:value-of select="../@id"/>'::<xsl:value-of select="$enum_id"/> AND $2='<xsl:value-of select="local-name()"/>'::locales THEN '<xsl:value-of select="@descr"/>'
+			</xsl:for-each>ELSE ''
+			END;		
+		$$ LANGUAGE sql;	
+		ALTER FUNCTION <xsl:value-of select="$func"/> OWNER TO <xsl:value-of select="/metadata/@owner"/>;		
+		</xsl:otherwise>
+	</xsl:choose>
+	
+	<!-- type -->
+	<xsl:choose>
+		<xsl:when test="@cmd=$CMD_DROP">
+			DROP FUNCTION <xsl:value-of select="$func"/>;
+			DROP VIEW <xsl:value-of select="$view"/>;
 			DROP TYPE <xsl:value-of select="$enum_id"/>;
 		</xsl:when>
 		<xsl:when test="@cmd=$CMD_CREATE">
@@ -1108,7 +1131,6 @@ ALTER FUNCTION <xsl:value-of select="$open_period_prototype"/> OWNER TO <xsl:val
 		<xsl:otherwise>
 		</xsl:otherwise>
 	</xsl:choose>
-
 <!--	
 	<xsl:variable name="enum_id">
 		<xsl:choose>
@@ -1467,7 +1489,7 @@ select="substring-after($text,$replace)"/>
 			</xsl:otherwise>
 			</xsl:choose>
 		$BODY$
-		LANGUAGE sql VOLATILE COST 100;
+		LANGUAGE sql STABLE COST 100;
 		ALTER FUNCTION <xsl:value-of select="$func_prot"/> OWNER TO <xsl:value-of select="/metadata/@owner"/>;
 		
 		--constant set value

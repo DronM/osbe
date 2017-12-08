@@ -121,7 +121,7 @@ GridCell.prototype.setValue = function(val){
 		
 		var f_func = this.m_gridColumn.getFormatFunction();
 		if (f_func){			
-			val = f_func.call(this,this.m_gridColumn.getGrid().getModel().getFields());
+			val = f_func.call(this.m_gridColumn,this.m_gridColumn.getGrid().getModel().getFields());
 		}
 		if (elem_cnt==1){			
 			//value to the first control

@@ -9,21 +9,22 @@
   
  */
 
-require_once('Config.php');
+require_once('Manager.php');
 
-class ProjectManager{
+/* GIT repository */
+require_once('Git.php-master/Git.php');	
+
+class ProjectManager extends Manager{
 
 	const ER_NO_GIT_USER = 'GIT user is not defined!';
 
-	const TEPL_FILE_EXT = '.proj-tmpl';
-	const MD_FILE_NAME = 'metadata.xml';
+	const TEPL_FILE_EXT = '.proj-tmpl';	
+	const TEPLM_FILE_EXT = '.proj-tmplm';//Mustache template		
 	const VERS_FILE_NAME = 'version.php';
 	const CONFIG_FILE_NAME = 'Config.php';
 	const README_FILE_NAME = 'README.md';
-	const INIT_DB_FILE_NAME = 'init_db.sql';
-	
-	const BUILD_DIR = 'build';
-	const TEMPL_DIR = 'templates';
+	const INIT_DB_FILE_NAME = 'init_db_sql';
+			
 	const CONTROLLERS_DIR = 'controllers';
 	const MODELS_DIR = 'models';
 	const VIEWS_DIR = 'views';
@@ -33,7 +34,7 @@ class ProjectManager{
 	const CSS_DIR = 'css';
 	const DB_DIR = 'db';
 	const DOC_DIR = 'doc';
-	const SQL_DIR = 'sql';
+	
 	const UPDATES_DIR = 'updates';
 	const JS_ENUM_DIR = 'enum_controls';
 	
@@ -43,8 +44,6 @@ class ProjectManager{
 	
 	const JS_LIB_NAME = 'lib.js';	
 	const CSS_LIB_NAME = 'styles.css';
-	
-	const START_PROJ_FLD_PREF = 'START_PROJ_FIELD_';
 	
 	const CONTROLLER_PHP_TEMPL = 'Controller_php.tmpl';
 	const CONTROLLER_PHP_XSL = 'Controller_php.xsl';
@@ -95,66 +94,6 @@ class ProjectManager{
 	const DUMP_DB_TEMPL = 'database%s.dump.gz';
 	
 	//*******************************************************************
-	//home project directory
-	private $projectDir;
-	private $jsVersion;
-	
-	//framework build directory
-	private $repoDir;
-	
-	private $buildGroup;
-	private $buildFilePermission;
-	private $buildDirPermission;
-
-	public function getMdFile(){
-		return $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR.DIRECTORY_SEPARATOR. self::MD_FILE_NAME;
-	}
-	
-	public function getJsDirectory(){
-		return $this->jsVersion;
-	}
-	
-	private function convToUtf8($str){
-		if (mb_detect_encoding($str,"UTF-8,iso-8859-1",TRUE)!="UTF-8" ){
-			return  iconv("iso-8859-1","UTF-8",$str);
-		}
-		else{
-			return $str;
-		}
-	}
-
-	private function run_shell_cmd($command){		
-		$descriptorspec = array(
-			1 => array('pipe', 'w'),
-			2 => array('pipe', 'w'),
-		);
-		$pipes = array();
-		if(count($_ENV) === 0) {
-			$env = NULL;
-			/*
-			foreach($envopts as $k => $v) {
-				putenv(sprintf("%s=%s",$k,$v));
-			}
-			*/
-		} else {
-			$env = array_merge($_ENV, $envopts);
-		}
-		$cwd = $this->projectDir;
-		$resource = proc_open($command, $descriptorspec, $pipes, $cwd, $env);
-
-		$stdout = stream_get_contents($pipes[1]);
-		$stderr = stream_get_contents($pipes[2]);
-		foreach ($pipes as $pipe) {
-			fclose($pipe);
-		}
-
-		$status = trim(proc_close($resource));
-		if ($status) throw new Exception($stderr);
-
-		return $stdout;
-	
-	}
-
 	private function transform($inFile,$templFile,$outFile,$log){
 		if (!file_exists($templFile)){
 			throw new Exception('Template not found: '.$templFile);
@@ -192,25 +131,6 @@ class ProjectManager{
 		}		
 	}	
 
-	function set_file_permission($fileName){
-		if (!file_exists($fileName)){
-			throw new Exception('Permission setting, file not found: '.$fileName);
-		}
-		$perm = (is_dir($fileName))? $this->buildDirPermission:$this->buildFilePermission;
-		try{
-			chgrp($fileName,$this->buildGroup);
-			$this->run_shell_cmd(sprintf('chmod %s %s',$perm,$fileName));				
-		}
-		catch (Exception $e){
-			echo "Can not change file: ".$fileName;
-		}
-	}
-
-	private function str_to_file($fileName,$str){
-		file_put_contents($fileName,$str);
-		$this->set_file_permission($fileName);
-	}
-	
 	/**
 	 * builds js documentation.
 	 * @public
@@ -246,11 +166,9 @@ class ProjectManager{
 	*/
 	public function DTDValid($log){		
 		$md_file = $this->getMdFile();
-		
-		$dom=new DOMDocument();
+		$dom = new DOMDocument();
 		$dom->load($md_file);
 		if (!$dom->validate()){
-			$log->add('Document DTD validation error','error');
 			throw new Exception('Document DTD validation error');
 		}
 		$log->add('Document successfully validated with DTD','note');	
@@ -283,9 +201,8 @@ class ProjectManager{
 		$xml = simplexml_load_file($md_file);
 		
 		$js_res = '';
-		$js_list = $xml->jsScripts->jsScript;
 		$cnt = 0;
-		foreach($js_list as $js_script){
+		foreach($xml->jsScripts->jsScript as $js_script){
 			$file = $this->projectDir.DIRECTORY_SEPARATOR. $this->getJsDirectory().DIRECTORY_SEPARATOR. $js_script->attributes()->file;
 			if (!file_exists($file)){
 				throw new Exception('File not found: '.$file);
@@ -323,9 +240,8 @@ class ProjectManager{
 		
 		//css minify
 		$res = '';
-		$list = $xml->cssScripts->cssScript;
 		$cnt = 0;
-		foreach($list as $script){
+		foreach($xml->cssScripts->cssScript as $script){
 			if (file_exists(ABSOLUTE_PATH.'css')){
 				//depricated style
 				$file = ABSOLUTE_PATH.'css/'.$script->attributes()->file;
@@ -379,7 +295,7 @@ class ProjectManager{
 		
 	/**
 	 * Creates recursively all symbolic links in a project (to folders and to files) in $sourceDir.
-	 * Files (or folders) that end on self::TEPL_FILE_EXT are skipped. These are templates. They are treated in copy_all_templates function.
+	 * Files (or folders) that end on self::TEPL_FILE_EXT/self::TEPLM_FILE_EXT are skipped. These are templates. They are treated in copy_all_templates function.
 	 * If a folder is not a template, symbolic link will be created to this folder without recursion. For example js/core
 	 * @private
 	 * @param {string} sourceDir
@@ -388,9 +304,12 @@ class ProjectManager{
 	private function copy_all_symlinks($sourceDir,$destDir){
 		$dh  = opendir($sourceDir);
 		while (false !== ($filename = readdir($dh))) {
-		    if ($filename!='.'&&$filename!='..'){
-		    	if (substr($filename,strlen($filename)-strlen(self::TEPL_FILE_EXT))!=self::TEPL_FILE_EXT
-		    	&&substr($filename,strlen($filename)-1,1)!='~'){
+		    if ($filename!='.' && $filename!='..'){
+		    	if (
+		    	substr($filename,strlen($filename)-strlen(self::TEPL_FILE_EXT))!=self::TEPL_FILE_EXT
+		    	&& substr($filename,strlen($filename)-strlen(self::TEPLM_FILE_EXT))!=self::TEPLM_FILE_EXT
+		    	&& substr($filename,strlen($filename)-1,1)!='~'
+		    	){
 		    		//Это НЕ шаблон
 		    		
 		    		//Exception or silent skeep???
@@ -399,13 +318,17 @@ class ProjectManager{
 		    		}
 		    		
 		    		if (!file_exists($destDir.DIRECTORY_SEPARATOR. $filename)){
+		    			//broken link check
+		    			if (is_link($destDir.DIRECTORY_SEPARATOR. $filename)){
+		    				unlink($destDir.DIRECTORY_SEPARATOR. $filename);
+		    			}
 		    			symlink($sourceDir.DIRECTORY_SEPARATOR. $filename,$destDir.DIRECTORY_SEPARATOR. $filename);
 		    			//add to .gitignore
 		    			if (file_exists($fl=$this->projectDir.'/.gitignore')){
 		    				$cont = file_get_contents($fl);
 		    				$rel_path = str_replace($this->projectDir,'',$destDir.DIRECTORY_SEPARATOR. $filename);
 		    				if (strpos($cont,$rel_path)===FALSE){
-		    					file_put_contents($fl,$cont.$rel_path.PHP_EOL);
+		    					$this->str_to_file($fl,$cont.$rel_path.PHP_EOL);
 		    				}
 		    				
 		    			}
@@ -414,9 +337,15 @@ class ProjectManager{
 		    	else if (is_dir($sourceDir.DIRECTORY_SEPARATOR. $filename)){
 		    		//Это папка ШАБЛОН, ищем там симлинки
 				//убираем постфикс из имени файла
-				$new_filename = substr($filename,0,strlen($filename)-strlen(self::TEPL_FILE_EXT));
+				if (substr($filename,strlen($filename)-strlen(self::TEPL_FILE_EXT))==self::TEPL_FILE_EXT){
+					$ext = self::TEPL_FILE_EXT;
+				}
+				else{
+					$ext = self::TEPLM_FILE_EXT;
+				}
+				$new_filename = substr($filename,0,strlen($filename)-strlen($ext));
 		    		
-		    		$this->copy_all_symlinks($sourceDir.DIRECTORY_SEPARATOR. $filename,$destDir.DIRECTORY_SEPARATOR. $new_filename,self::TEPL_FILE_EXT);
+		    		$this->copy_all_symlinks($sourceDir.DIRECTORY_SEPARATOR. $filename,$destDir.DIRECTORY_SEPARATOR. $new_filename);
 		    	}		    	
 		    }
 		}
@@ -426,34 +355,51 @@ class ProjectManager{
 
 	/**
 	 * Makes recursively all project files (folders && files) from templates in sourceDir
-	 * Templates are files (folders) that end on self::TEPL_FILE_EXT,
+	 * Templates are files (folders) that end on self::TEPL_FILE_EXT/self::TEPLM_FILE_EXT,
 	 * If a folder is not a template it is skipped.
+	 * @param {string} sourceDir
+	 * @param {string} destDir
+	 * @param {array} templParams
 	 */
-	function copy_all_templates($sourceDir,$destDir){
+	private function copy_all_templates($sourceDir,$destDir,&$templParams){
+		$m = new Mustache_Engine;
 		$dh  = opendir($sourceDir);
 		while (false !== ($filename = readdir($dh))) {
-		    if ($filename!='.'&&$filename!='..'){
-		    	if (substr($filename,strlen($filename)-strlen(self::TEPL_FILE_EXT))==self::TEPL_FILE_EXT){
+		    if ($filename!='.' && $filename!='..'){
+		    	if (
+		    	substr($filename,strlen($filename)-strlen(self::TEPL_FILE_EXT))==self::TEPL_FILE_EXT
+		    	|| substr($filename,strlen($filename)-strlen(self::TEPLM_FILE_EXT))==self::TEPLM_FILE_EXT
+		    	){
 		    		//Это шаблон
 		    		
-				//убираем постфикс из имени файла
-				$new_filename = substr($filename,0,strlen($filename)-strlen(self::TEPL_FILE_EXT));
+				//убираем постфикс из имени файла TEPL_FILE_EXT/TEPLM_FILE_EXT
+				if (substr($filename,strlen($filename)-strlen(self::TEPL_FILE_EXT))==self::TEPL_FILE_EXT){
+					$ext = self::TEPL_FILE_EXT;
+				}
+				else{
+					$ext = self::TEPLM_FILE_EXT;
+				}
+				$new_filename = substr($filename,0,strlen($filename)-strlen($ext));
 		    		
 			    	if (is_dir($sourceDir.DIRECTORY_SEPARATOR. $filename)){
 			    		if (!file_exists($destDir.DIRECTORY_SEPARATOR. $new_filename)){
 				    		mkdir($destDir.DIRECTORY_SEPARATOR. $new_filename);
 				    		$this->set_file_permission($destDir.DIRECTORY_SEPARATOR. $new_filename);
 			    		}
-			    		$this->copy_all_templates($sourceDir.DIRECTORY_SEPARATOR. $filename,$destDir.DIRECTORY_SEPARATOR. $new_filename,self::TEPL_FILE_EXT);
+			    		$this->copy_all_templates(
+			    			$sourceDir.DIRECTORY_SEPARATOR. $filename,
+			    			$destDir.DIRECTORY_SEPARATOR. $new_filename,
+			    			$templParams
+			    		);
 			    	}
 			    	else{
 			    		//копирование шаблона
 			    		if (!file_exists($destDir.DIRECTORY_SEPARATOR. $new_filename)){
-						file_put_contents(			
+			    			//пропускаем через mustache и пишем			    			
+						$this->str_to_file(			
 							$destDir.DIRECTORY_SEPARATOR. $new_filename,
-							file_get_contents($sourceDir.DIRECTORY_SEPARATOR. $filename)
+							$m->render(file_get_contents($sourceDir.DIRECTORY_SEPARATOR.$filename),$templParams)
 						);
-						$this->set_file_permission($destDir.DIRECTORY_SEPARATOR. $new_filename);
 					}
 			    	}		    	
 		    	}		    	
@@ -462,25 +408,8 @@ class ProjectManager{
 		closedir($dh);		
 	}
 
-	/**
-	 * ProjectManager object is constructed in page.php
-	 * @constructor
-	 * @param {string} projectDir Project directory
-	 * @param {string} repoDir Directory with repository
-	 * @param {string} jsVersion
-	 * @param {array} permAr Hash array
-	 */
-	public function __construct($projectDir,$repoDir,$jsVersion,$permAr){
-		$this->projectDir = $projectDir;
-		$this->repoDir = $repoDir;
-		$this->jsVersion = $jsVersion;
-		$this->buildGroup = $permAr['buildGroup'];
-		$this->buildFilePermission = $permAr['buildFilePermission'];
-		$this->buildDirPermission = $permAr['buildDirPermission'];
-	
-	}
 	public function createSymlinks($log){
-		$this->copy_all_symlinks($this->repoDir.DIRECTORY_SEPARATOR. self::TEMPL_DIR, $this->projectDir, self::TEPL_FILE_EXT);
+		$this->copy_all_symlinks($this->repoDir.DIRECTORY_SEPARATOR. self::TEMPL_DIR, $this->projectDir);
 		$log->add('Symbolic links are created.','warn');
 	}
 	
@@ -665,7 +594,8 @@ class ProjectManager{
 				if ($xml->xpath("/metadata/jsScripts/jsScript[@file='models/{$id}_Model.js']")==FALSE){
 					array_push($js_scripts_to_add,"models/{$id}_Model.js");
 				}		
-			}			
+			}
+			
 		}
 		//********************** models *************************
 
@@ -973,11 +903,48 @@ DO NOT MODIFY IT!!!
 				$log
 			);
 			
-			$cont_last_update = trim(file_get_contents($f_last_update));
+			//virtrtual models to sql
+			$model_list = $xml->models->model;
+			foreach($model_list as $model){	
+				if (
+					$model->attributes()->cmd
+					&& ($model->attributes()->cmd=='alt' || $model->attributes()->cmd=='add')
+					&& $model->attributes()->virtual=='TRUE'
+					&& $model->attributes()->dataTable
+					&& file_exists($f_view_sql = $proj_build_dir.DIRECTORY_SEPARATOR. self::SQL_DIR.DIRECTORY_SEPARATOR. $model->attributes()->dataTable.'.sql')
+				){
+					$this->str_to_file($f_last_update,
+						trim(file_get_contents($f_last_update)).PHP_EOL.
+						'-- ************* virtual table ****************'.PHP_EOL.PHP_EOL.
+						trim(file_get_contents($f_view_sql))
+					);
+				}
+			}
 			
+			//SQL scripts to sql
+			$sql_list = $xml->sqlScripts->sqlScript;
+			if (!is_null($sql_list)){
+				foreach($sql_list as $sql){	
+					if (
+						$sql->attributes()->cmd
+						&& ($sql->attributes()->cmd=='alt' || $sql->attributes()->cmd=='add')
+						&& file_exists($f_sql = $proj_build_dir.DIRECTORY_SEPARATOR. self::SQL_DIR.DIRECTORY_SEPARATOR. $sql->attributes()->file)
+					){
+						$this->str_to_file($f_last_update,
+							trim(file_get_contents($f_last_update)).PHP_EOL.PHP_EOL.PHP_EOL.
+							'-- ************* SQL script ****************'.PHP_EOL.
+							trim(file_get_contents($f_sql))
+						);
+					}
+				}
+			}
+			
+			$cont_last_update = trim(file_get_contents($f_last_update));
 			if (strlen($cont_last_update)){
+				$this->str_to_file($f_last_update,$cont_last_update);
+				
 				//all to all-updates file
-				if ($f_update){
+				if (file_exists($f_update)){
 					$all = file_get_contents($f_update).PHP_EOL.PHP_EOL.PHP_EOL;
 				}
 				else{
@@ -996,6 +963,9 @@ DO NOT MODIFY IT!!!
 		if ($md_modif){
 			$dom=new DOMDocument();
 			$dom->load($md_file);
+			$dom->preserveWhiteSpace = false;
+			$dom->formatOutput = true;				
+			
 			/*			
 			if ($dom->validate()){
 				$log->add('Document DTD validation error','error');
@@ -1080,8 +1050,8 @@ DO NOT MODIFY IT!!!
 			foreach($mod_nodes as $n){
 				$n->removeAttribute('cmd');
 			}			
-	
-			$dom->save($md_file);
+			
+			self::saveDOM($dom,$md_file);
 		}
 		
 	}
@@ -1134,7 +1104,8 @@ DO NOT MODIFY IT!!!
 		$vers_n->setAttribute('dateOpen', date('Y-m-d H:m:i'));
 		
 		$parent_n->appendChild($vers_n);
-		$dom->save($md_file);	
+		//$dom->save($md_file);	
+		self::saveDOM($dom,$md_file);
 	}
 	
 	public function closeVersion($log){
@@ -1155,9 +1126,13 @@ DO NOT MODIFY IT!!!
 		$log->add("Version closed.",'warn');
 	}
 
+	/**
+	 * puts all variables from $startProjParams to a file named $fileName
+	 * @param {array} startProjParams
+	 * @param {object} log
+	 * @param {string} fileName
+	 */
 	/*
-	puts all variables from $startProjParams to a file named $fileName
-	*/
 	private function varsToTemplateFile($startProjParams,$log,$fileName){
 		$file = file_get_contents($fileName);
 		
@@ -1177,12 +1152,56 @@ DO NOT MODIFY IT!!!
 		
 		return $file_ch;
 	}
-
-	public function startProject($startProjParams,$log){
+	*/
+	
+	/*
+	 * @param {array} startProjParams copy of _REQUEST
+	 * @param {Logger} log
+	 */
+	public function startProject($startProjParams, $log){
 		$repo_templ_dir = $this->repoDir.DIRECTORY_SEPARATOR. self::TEMPL_DIR;
+		//metadata modification
+		$startProjParams['timestamp'] = date('Y-m-d H:m:i');
 		
-		/******************** Templates *******************************/
-		$this->copy_all_templates($repo_templ_dir, $this->projectDir);
+		/******************** DB superuser code *****************************/
+		$dbAuth = array(
+			'DB_PASSWORD'=>$startProjParams['DB_CREATE_PASSWORD'],
+			'DB_SERVER_MASTER'=>$startProjParams['DB_SERVER'],
+			'DB_NAME'=>'postgres',
+			'DB_USER'=>$startProjParams['DB_CREATE_USER']
+		);
+		$m = new Mustache_Engine;		
+		
+		//new user
+		$q = $m->render("CREATE USER {{DB_USER}} WITH PASSWORD '{{DB_PASSWORD}}';",$startProjParams);
+		$this->runSQL($dbAuth,$q,$log);
+		$startProjParams['SUPERUSER_CODE'] = $q;
+		
+		//new database
+		$q = $m->render("CREATE DATABASE {{DB_NAME}} OWNER {{DB_USER}};",$startProjParams);		
+		$this->runSQL($dbAuth,$q,$log);
+		$startProjParams['SUPERUSER_CODE'].= PHP_EOL.$q;
+		
+		//new database
+		$q = $m->render("GRANT ALL PRIVILEGES ON DATABASE {{DB_NAME}} TO {{DB_USER}};",$startProjParams);
+		$this->runSQL($dbAuth,$q,$log);
+		$startProjParams['SUPERUSER_CODE'].= PHP_EOL.$q;
+		
+		if (strtolower($startProjParams['DB_SCHEMA'])!='public'){
+			//new schema
+			$q = $m->render("CREATE SCHEMA {{DB_SCHEMA}};",$startProjParams);
+			$this->runSQL($dbAuth,$q,$log);
+			$startProjParams['SUPERUSER_CODE'].= PHP_EOL.$q;
+		}
+		
+		$q = $m->render("GRANT SELECT ON ALL TABLES IN SCHEMA {{DB_SCHEMA}} TO {{DB_USER}};",$startProjParams);
+		$this->runSQL($dbAuth,$q,$log);
+		$startProjParams['SUPERUSER_CODE'].= PHP_EOL.$q;
+		/******************** DB superuser code *****************************/
+
+
+		/******************** Templates *******************************/		
+		$this->copy_all_templates($repo_templ_dir, $this->projectDir,$startProjParams);		
 		$log->add('Template files are created.','note');
 		/******************** Templates *******************************/
 		
@@ -1191,94 +1210,60 @@ DO NOT MODIFY IT!!!
 		$this->createSymlinks($log);
 		/********************** symlinks **********************************/
 		
-		
+				
 		/**************** start version in metadata **********************/
 		$this->openVersion(self::INIT_VERSION,$log);
 		$this->createVersionFile(self::INIT_VERSION,$log);
 		/**************** start version in metadata **********************/
 		
 		
-		/*******************  Config.php ***********************/
-		$this->varsToTemplateFile($startProjParams, $log, $this->projectDir.DIRECTORY_SEPARATOR. self::CONFIG_FILE_NAME);
-		$log->add('Config file is generated.','note');
-		/*
-		$config_file = $this->projectDir.DIRECTORY_SEPARATOR. self::CONFIG_FILE_NAME;
-		$config = file_get_contents($config_file);
-		
-		//Field changing @ToDo make function for doing this
-		$fld_pref = self::START_PROJ_FLD_PREF;
-		$fld_pref_len = strlen($fld_pref);		
-		$config_ch = FALSE;
-		foreach($startProjParams as $fld=>$val){
-			if (substr($fld,0,$fld_pref_len)==$fld_pref){
-				$config = str_replace($fld, $val, $config);
-				$config_ch = TRUE;
-			}
+		/*******************  db init *********************************/
+		/**
+		 * File self::INIT_DB_FILE_NAME contains all essetial init db script
+		 * 1) Add superuser code to init script
+		 * 2) put init script to build/update.sql and run it
+		 */
+		$dbAuth = array(
+			'DB_PASSWORD'=>$startProjParams['DB_PASSWORD'],
+			'DB_SERVER_MASTER'=>$startProjParams['DB_SERVER'],
+			'DB_NAME'=>$startProjParams['DB_NAME'],
+			'DB_USER'=>$startProjParams['DB_USER']
+		);
+		//1)		
+		$f_init_db = $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR.DIRECTORY_SEPARATOR. self::SQL_DIR. DIRECTORY_SEPARATOR. self::INIT_DB_FILE_NAME;
+		$cont_init_db = '';
+		if (file_exists($f_init_db)){
+			$cont_init_db = PHP_EOL. $m->render(file_get_contents($f_init_db),$startProjParams);
 		}
-		if ($config_ch){
-			file_put_contents($config_file,$config);
-			$log->add('Config file is generated.','note');
-		}
-		*/		
-		/*******************  Config.php ***********************/
-
-
-		/*******************  build/sql/init_db.sql ***********************/
-		if (isset($startProjParams[self::START_PROJ_FLD_PREF.'DB_USER']) && strlen($startProjParams[self::START_PROJ_FLD_PREF.'DB_USER'])){
-			/*
-			$initdb_file = $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR. DIRECTORY_SEPARATOR. self::INIT_DB_FILE_NAME;
-			$initdb = file_get_contents($initdb_file);
-			
-			//Field changing @ToDo make function for doing this
-			$fld_pref = self::START_PROJ_FLD_PREF;
-			$fld_pref_len = strlen($fld_pref);		
-			$initdb_ch = FALSE;
-			foreach($startProjParams as $fld=>$val){
-				if (substr($fld,0,$fld_pref_len)==$fld_pref){
-					$initdb = str_replace($fld, $val, $initdb);
-					$initdb_ch = TRUE;
-				}
-			}
-			if ($initdb_ch){
-				file_put_contents($initdb_file,$initdb);
-			}		
-			*/
-			$this->varsToTemplateFile($startProjParams, $log, $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR. DIRECTORY_SEPARATOR. self::SQL_DIR. DIRECTORY_SEPARATOR. self::INIT_DB_FILE_NAME);
-			$log->add('Init database sql script is generated.','note');
-		}
-		/*******************  build/sql/init_db.sql ***********************/
+		//2)
+		$f_update = $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR.DIRECTORY_SEPARATOR. self::DB_UPDATE_SCRIPT;
+		$this->str_to_file($f_update,$cont_init_db);
+		$this->runSQLFromFile($dbAuth,$f_update,$log);		
+		/*******************  db init *********************************/
 
 		
 		/******************** ReadMe ***************************/
 		if (file_exists($fl=$this->projectDir.DIRECTORY_SEPARATOR. self::README_FILE_NAME)){
-			file_put_contents($fl,$startProjParams['proj_descr'].PHP_EOL,FILE_APPEND);
+			$this->str_to_file($fl,$startProjParams['proj_descr'].PHP_EOL,FILE_APPEND);
 			$log->add('Description file is generated.','note');
 		}
 		/******************** ReadMe ***************************/
 		
 		
 		/******************** server repository *************************/
-		if (isset($startProjParams[self::START_PROJ_FLD_PREF.'GITHUB_USER']) && strlen($startProjParams[self::START_PROJ_FLD_PREF.'GITHUB_USER'])){
-		
-			require_once('common/Git.php-master/Git.php');	
+		if (isset($startProjParams['GITHUB_USER']) && strlen($startProjParams['GITHUB_USER'])){
 		
 			$git = new GitRepo($this->projectDir,TRUE,TRUE);
-			$git->run(sprintf('config  user.email "%s"',$startProjParams[self::START_PROJ_FLD_PREF.'TECH_EMAIL']));
-			$git->run(sprintf('config  user.name "%s"',$startProjParams[self::START_PROJ_FLD_PREF.'AUTHOR']));
+			$git->run(sprintf('config  user.email "%s"',$startProjParams['TECH_EMAIL']));
+			$git->run(sprintf('config  user.name "%s"',$startProjParams['GITHUB_USER']));
 			$git->run(sprintf('remote add origin git@github.com:%s/%s.git',
-				$startProjParams[self::START_PROJ_FLD_PREF.'GITHUB_USER'],
-				$startProjParams[self::START_PROJ_FLD_PREF.'APP_NAME'])
+				$startProjParams['GITHUB_USER'],
+				$startProjParams['APP_NAME'])
 			);
 			$log->add('Server repository is created.','note');		
 			$this->commit('Creating new repository',$log);
 			$this->push($log);
-			/******************** server repository *************************/
-		
-			/*		
-			$git->add('.');
-			$git->commit("Creating new repository", TRUE);
-			$git->run('push origin master');
-			*/
+			/******************** server repository *************************/		
 		}
 		else{
 			$log->add(self::ER_NO_GIT_USER,'error');
@@ -1286,46 +1271,23 @@ DO NOT MODIFY IT!!!
 	}
 	
 	public function pull($log){
-		if (defined('GITHUB_USER')){
-			/* GIT repository */
-			require_once('common/Git.php-master/Git.php');	
-		
-			$git = new GitRepo($this->projectDir);
-			$git->run('pull origin master');	
-			$log->add('Project files are pulled from the server.','warn');
-		}
-		else{
-			$log->add(self::ER_NO_GIT_USER,'error');
-		}
+		$git = new GitRepo($this->projectDir);
+		$git->run('pull origin master');	
+		$log->add('Project files are pulled from the server.','warn');
 	}
 	public function push($log){
-		if (defined('GITHUB_USER')){
-			/* GIT repository */
-			require_once('common/Git.php-master/Git.php');	
-		
-			$git = new GitRepo($this->projectDir);
-			$git->run('push origin master');
-			$log->add('Project files are pushed to the server.','warn');
-		}
-		else{
-			$log->add(self::ER_NO_GIT_USER,'error');
-		}			
+		$git = new GitRepo($this->projectDir);
+		$git->run('push origin master');
+		$log->add('Project files are pushed to the server.','warn');
 	}
 
 	public function commit($commitDescr,$log){
-		if (defined('GITHUB_USER')){
-			/* GIT repository */
-			require_once('common/Git.php-master/Git.php');	
-		
-			setlocale(LC_ALL, 'ru_RU.UTF-8');
-		
-			$git = new GitRepo($this->projectDir);
-			$git->add('.');
-			$git->commit($commitDescr, TRUE);
-		}
-		else{
-			$log->add(self::ER_NO_GIT_USER,'error');
-		}						
+		//@ToDo
+		setlocale(LC_ALL, 'ru_RU.UTF-8');
+	
+		$git = new GitRepo($this->projectDir);
+		$git->add('.');
+		$git->commit($commitDescr, TRUE);
 	}
 	
 	public function prepareSQLForUpdate($log){
@@ -1341,7 +1303,8 @@ DO NOT MODIFY IT!!!
 			$this->set_file_permission($update_sql_dir);
 		}
 		else{
-			$this->run_shell_cmd('rm -f -r '. $update_sql_dir.'/*');
+			//$this->run_shell_cmd('rm -f -r '. $update_sql_dir.'/*');
+			self::deleteDir($update_sql_dir);
 		}			
 		if (file_exists($build_dir.DIRECTORY_SEPARATOR. self::UPDATE_SQL)){
 			$sql_upd_cont = trim(file_get_contents($build_dir.DIRECTORY_SEPARATOR. self::UPDATE_SQL));
@@ -1454,8 +1417,6 @@ DO NOT MODIFY IT!!!
 	}
 	*/
 	public function clone_repo($gitUser,$projId,$log){
-		/* GIT repository */
-		require_once('common/Git.php-master/Git.php');	
 		/*
 		$tmp_repo = $this->getTmpRepoDir();
 		if (file_exists($tmp_repo)){
@@ -1471,16 +1432,45 @@ DO NOT MODIFY IT!!!
 	}
 	
 	/*
-	dbAuth - array of 
-		DB_PASSWORD
-		DB_SERVER_MASTER
-		DB_NAME
-		DB_USER
-	*/
+	 */
+	private function runSQLFromFile($dbAuth,$scriptFile,$log){
+		$cmd = sprintf('export PGPASSWORD=%s ; psql -h %s -d %s -U %s -f '.$scriptFile,
+				$dbAuth['DB_PASSWORD'],
+				$dbAuth['DB_SERVER_MASTER'],
+				$dbAuth['DB_NAME'],
+				$dbAuth['DB_USER']
+		);
+		$log->add('Executing sql file: '.$scriptFile,'note');
+		$this->run_shell_cmd($cmd);					
+	}
+	/*
+	 */
+	private function runSQL($dbAuth,$script,$log){
+		$cmd = sprintf("export PGPASSWORD=%s ; psql -h %s -d %s -U %s -c \"%s\"",
+				$dbAuth['DB_PASSWORD'],
+				$dbAuth['DB_SERVER_MASTER'],
+				$dbAuth['DB_NAME'],
+				$dbAuth['DB_USER'],
+				$script
+		);
+		$log->add('Executing SQL: '.$script,'note');
+		$this->run_shell_cmd($cmd);					
+	}
+	
+	
+	/*
+	 * Run all sql scripts from updates directory.
+	 * self::DB_UPDATE_SCRIP is run first,then all the others, sorted on their modification time.
+	 * @param{array} dbAuth - array of 
+	 *			DB_PASSWORD
+	 *			DB_SERVER_MASTER
+	 *			DB_NAME
+	 *			DB_USER
+	 */
 	public function applySQL($dbAuth,$log){
 		$rel_dir = self::UPDATES_DIR.DIRECTORY_SEPARATOR .self::SQL_DIR;
 		
-		$log->add('Applying all sql scripts from '. $rel_dir,'warn');
+		$log->add('Applying all sql scripts from '. $rel_dir,'note');
 		
 		$sql_ext = '.sql';
 		$scripts = array();
@@ -1489,7 +1479,7 @@ DO NOT MODIFY IT!!!
 		
 		$dh  = opendir($sourceDir);
 		while (false !== ($filename = readdir($dh))) {
-			if ($filename!='.'&&$filename!='..'
+			if ($filename!='.' && $filename!='..'
 			&&substr($filename,strlen($filename)-strlen($sql_ext))==$sql_ext){				
 				if ($filename == self::DB_UPDATE_SCRIPT){
 					$tm = 0;
@@ -1508,14 +1498,7 @@ DO NOT MODIFY IT!!!
 			sort($script_times);
 			foreach($script_times as $mod_time){
 				$script = $scripts[$mod_time];
-				$cmd = sprintf('export PGPASSWORD=%s ; psql -h %s -d %s -U %s -f '.$sourceDir.DIRECTORY_SEPARATOR.$script,
-						$dbAuth['DB_PASSWORD'],
-						$dbAuth['DB_SERVER_MASTER'],
-						$dbAuth['DB_NAME'],
-						$dbAuth['DB_USER']
-				);
-				$log->add('Executiong '.$script,'note');
-				$this->run_shell_cmd($cmd);				
+				$this->runSQLFromFile($dbAuth,$sourceDir.DIRECTORY_SEPARATOR.$script,$log);				
 			}
 		}
 	}

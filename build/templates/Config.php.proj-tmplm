@@ -1,0 +1,97 @@
+<?php
+/* absolute path to project */
+define('ABSOLUTE_PATH', dirname(__FILE__).DIRECTORY_SEPARATOR);
+
+/* Framwork path */
+define('FRAME_WORK_PATH', '{{FW_DIR}}'.DIRECTORY_SEPARATOR);
+
+/* Current project version.
+ * This value incremented with every version close in Project Manager
+ */
+require_once('version.php');
+
+/* path to user controllers */
+define('USER_CONTROLLERS_PATH', ABSOLUTE_PATH.'controllers'.DIRECTORY_SEPARATOR);
+
+/* path to user views */
+define('USER_VIEWS_PATH', ABSOLUTE_PATH.'views'.DIRECTORY_SEPARATOR);
+
+/* path to user templates */
+define('USER_TMPL_PATH', ABSOLUTE_PATH.'tmpl'.DIRECTORY_SEPARATOR);
+
+/* path to user models */
+define('USER_MODELS_PATH', ABSOLUTE_PATH.'models'.DIRECTORY_SEPARATOR);
+
+/* path to user functions */
+define('FUNC_PATH', ABSOLUTE_PATH.'functions'.DIRECTORY_SEPARATOR);
+
+/* path to permissions */
+define('PERM_PATH', ABSOLUTE_PATH.'permissions'.DIRECTORY_SEPARATOR);
+
+/*path to js*/
+define('JS_LIB', '{{JS_DIR}}');
+define('USER_JS_PATH', JS_LIB.DIRECTORY_SEPARATOR);
+
+/* path to css */
+define('USER_CSS_PATH', JS_LIB.DIRECTORY_SEPARATOR. 'custom-css'.DIRECTORY_SEPARATOR);
+
+define('PARAM_CONTROLLER', 'c');
+define('PARAM_METHOD', 'f');
+define('PARAM_VIEW', 'v');
+define('PARAM_TOKEN', 'token');
+define('PARAM_TEMPLATE', 't');
+
+define('OUTPUT_PATH', ABSOLUTE_PATH.'output'.DIRECTORY_SEPARATOR);
+
+/* Default View */
+define('DEF_VIEW', 'ViewBase');
+
+/* Default locale */
+define('DEF_LOCALE', '{{LOCALE}}');
+
+/*Default if not logged*/
+define('UNLOGGED_DEF_CONTROLLER', 'User_Controller');
+define('UNLOGGED_DEF_VIEW', 'Login');
+
+/* Building constants */
+define('BUILD_GROUP', '{{BUILD_GROUP}}');
+define('BUILD_FILE_PERMISSION', '{{BUILD_FILE_PERMISSION}}');
+define('BUILD_DIR_PERMISSION', '{{BUILD_DIR_PERMISSION}}');
+
+
+//**************************  USER DEFINED CINSTANTS ******************************************************
+
+/* current db server */
+define('DB_SERVER_MASTER','{{DB_SERVER}}');
+define('DB_SERVER','{{DB_SERVER}}');
+define('DB_PORT','{{DB_PORT}}');
+define('DB_SCHEMA','{{DB_SCHEMA}}');
+
+/* Db connection */
+define('DB_NAME', '{{DB_NAME}}');
+define('DB_USER', '{{DB_USER}}');
+define('DB_PASSWORD', '{{DB_PASSWORD}}');
+
+//Kladr
+/*
+define('KLADR_DB_SERVER', '{{KLADR_DB_SERVER}}');
+define('KLADR_DB_PORT','{{KLADR_DB_PORT}}');
+define('KLADR_DB_NAME', '{{KLADR_DB_NAME}}');
+define('KLADR_DB_USER', '{{KLADR_DB_USER}}');
+define('KLADR_DB_PASSWORD', '{{KLADR_DB_PASSWORD}}');
+*/
+
+/* Application */
+define('APP_NAME', '{{APP_NAME}}');
+define('DEBUG', TRUE);
+define('TECH_EMAIL', '{{TECH_EMAIL}}');
+define('AUTHOR', '{{AUTHOR}}');
+
+/* Session expiration limit in seconds */
+define('SESSION_EXP_SEC', 0);
+/* list of comma separated methods that can be called even when session has expired */
+define('TOKEN_AFTER_EXPIR_METHODS', 'logout,login_refresh');
+
+//**************************  USER DEFINED CINSTANTS ******************************************************
+
+?>

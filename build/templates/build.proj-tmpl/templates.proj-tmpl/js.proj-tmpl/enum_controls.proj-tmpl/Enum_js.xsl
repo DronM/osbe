@@ -9,7 +9,7 @@
 <xsl:template match="enums/enum"><![CDATA[]]>/**	
  * @author Andrey Mikhalevich &lt;katrenplus@mail.ru>, 2017
  * @class
- * @classdesc Enumerator class. Created from template build/templates/js/Enum_js.xsl. !!!DO NOT MODEFY!!!
+ * @classdesc Enumerator class. Created from template build/templates/js/Enum_js.xsl. !!!DO NOT MODIFY!!!
  
  * @extends EditSelect
  
@@ -17,7 +17,7 @@
  * @requires controls/EditSelect.js
  
  * @param string id 
- * @param {namespace} options
+ * @param {object} options
  */
 <xsl:variable name="enum_id" select="concat('Enum_',@id)"/>
 function <xsl:value-of select="$enum_id"/>(id,options){

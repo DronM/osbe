@@ -39,7 +39,7 @@ function App(id,options){
 	}
 	this.setServConnector(con);
 	
-	this.m_constantManager = new ConstantManager(this.m_servConnector,{"XMLString":options.constantXMLString});
+	this.m_constantManager = new ConstantManager({"XMLString":options.constantXMLString});
 	
 	this.m_cashData = {};
 	this.m_openedForms = {};

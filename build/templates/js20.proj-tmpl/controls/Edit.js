@@ -29,6 +29,7 @@
  * @param {string} options.editContClassName
  * @param {string} options.value
  * @param {bool} [options.inputEnabled=true] - direct input only,not buttons
+ * @param {Function} options.formatFunction
  */
 function Edit(id,options){
 	options = options || {};
@@ -71,8 +72,7 @@ function Edit(id,options){
 		this.setLabel(new Label(id+":label",
 			{"value":options.labelCaption,
 			"className":options.labelClassName,
-			"visible":this.getVisible(),
-			"app":options.app
+			"visible":this.getVisible()
 			}
 		));		
 	}
@@ -290,9 +290,10 @@ Edit.prototype.toDOM = function(parent){
 	var node_parent;
 	if (!this.m_html){	
 		var id = this.getId();	
-	
+//console.log("Edit.prototype.toDOM ID="+id+" visib="+this.getVisible())	
 		this.m_container = new ControlContainer( ((id)? id+":cont" : null),this.m_contTagName,{
-			"className":this.m_contClassName
+			"className":this.m_contClassName,
+			"visible":this.getVisible()
 		});	
 	
 		if (this.m_label && this.m_labelAlign=="left"){
@@ -350,6 +351,11 @@ Edit.prototype.delDOM = function(){
 
 Edit.prototype.setVisible = function(v){
 	Edit.superclass.setVisible.call(this,v);
+//console.log("Edit.prototype.setVisible ID="+this.getId()+" visib="+v)	
+	if (this.m_container){
+		
+		this.m_container.setVisible(v);
+	}
 	
 	if (this.m_label){
 		this.m_label.setVisible(v);

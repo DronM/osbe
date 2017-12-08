@@ -6,15 +6,6 @@ ViewList_View.prototype.HEAD_TITLE = "Все формы";
 ConstantList_View.prototype.GRID_COL_CAP = "Константы";
 ConstantList_View.prototype.HEAD_TITLE = "Константы";
 
-Bank_View.prototype.HEAD_TITLE = "Карточка банка";
-Bank_View.prototype.LB_CAP_BIK = "БИК:";
-Bank_View.prototype.LB_CAP_NAME = "Наименование:";
-Bank_View.prototype.LB_CAP_CITY = "Город:";
-Bank_View.prototype.LB_CAP_GROUP = "Регион:";
-Bank_View.prototype.LB_CAP_BANK_ACC = "Кор.счет:";
-Bank_View.prototype.LB_CAP_ADDRESS = "Адрес:";
-BankList_View.prototype.HEAD_TITLE = "Банки";
-
 ViewSectionSelect.prototype.LABEL_CAPTION = "Вид объекта:";
 
 MainMenuConstructorList_View.prototype.HEAD_TITLE = "Конструктор меню";
@@ -30,3 +21,7 @@ About_View.prototype.LB_TECH_MAIL = "Тех.поддержка:";
 About_View.prototype.LB_FW_SERVER_VERSION = "Версия платформы (сервер):";
 About_View.prototype.LB_FW_CLIENT_VERSION = "Версия платформы (клиент):";
 
+OutMailList_View.prototype.HEAD_TITLE = "Исходящие письма";
+OutMailDialog_View.prototype.HEAD_TITLE = "Исходящее письмо";
+
+UserList_View.prototype.HEAD_TITLE = "Пользователи";
