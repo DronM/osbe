@@ -101,3 +101,7 @@
 	
 2.1.12 31/10/2017	
 	basic_classes/VariantStorage.php Corrected mistakes.
+	
+2.1.13
+	09/12/2017
+	js GridColumn contstructor only one syntax support

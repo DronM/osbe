@@ -1,20 +1,21 @@
-/* Copyright (c) 2012 
-	Andrey Mikhalevich, Katren ltd.
-*/
-/*	
-	Description
-*/
-//ф
-/** Requirements
-  * @requires core/ValidatorDateTime.js  
-  * @requires controls/EditDate.js
-*/
-
-/* constructor
-	editMask
-	dateFormat
-	selectTimeValueStr
-*/
+/**	
+ * @author Andrey Mikhalevich <katrenplus@mail.ru>,2012
+ 
+ * @class
+ * @classdesc Basic visual editable control
+ 
+ * @extends EditDate
+ 
+ * @requires core/extend.js
+ * @requires controls/EditDate.js
+ * @requires core/AppWin.js     
+ 
+ * @param string id 
+ * @param {object} options
+ * @param {Validator} [options.validator=ValidatorDateTime] 
+ * @param {string} [options.editMask=App.getDateTimeEditMask]
+ * @param {string} [options.dateFormat=App.getDateTimeFormat] 
+ */
 function EditDateTime(id,options){
 	options = options || {};
 	

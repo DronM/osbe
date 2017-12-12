@@ -9,11 +9,11 @@
  
  * @param {int} {options.precision=DEF_PRECISION}
  */
-function GridColumnByte(id,options){
+function GridColumnByte(options){
 	options = options || {};	
 	
 	this.m_precision = options.precision || this.DEF_PRECISION;
-	GridColumnByte.superclass.constructor.call(this,id,options);
+	GridColumnByte.superclass.constructor.call(this,options);
 }
 extend(GridColumnByte,GridColumn);
 

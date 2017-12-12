@@ -1,29 +1,22 @@
-/* Copyright (c) 2016
-	Andrey Mikhalevich, Katren ltd.
-*/
-/*	
-	Description
-*/
-
-/** Requirements
-  * @requires controls/Control.js
-  * @requires controls/ControlContainer.js
-  * @requires controls/ButtonOpen.js  
-  * @requires controls/ButtonSelect.js    
-  * @requires controls/ButtonClear.js  
-  * @requires controls/Label.js    
-*/
-
-/* constructor
-@param string id 
-@param object options {
-	@param bool acMinLengthForQuery
-	@param bool acIc
-	@param bool acMid
-	@param Model acModel
-	@param PublicMethod acPublicMethod
-}
-*/
+/**	
+ * @author Andrey Mikhalevich <katrenplus@mail.ru>,2014
+ 
+ * @class
+ * @classdesc Basic visual editable control
+ 
+ * @extends Control
+ 
+ * @requires controls/Control.js
+ * @requires controls/ControlContainer.js
+ * @requires controls/ButtonOpen.js  
+ * @requires controls/ButtonSelect.js    
+ * @requires controls/ButtonClear.js  
+ * @requires controls/Label.js    
+ 
+ * @param string id 
+ * @param {Object} options
+ * @param {bool} [options.cmdAutoComplete=true] 
+ */
 function EditRef(id,options){
 	options = options || {};
 
@@ -39,7 +32,7 @@ function EditRef(id,options){
 	options.cmdSelect = (options.cmdSelect!=undefined)? options.cmdSelect:true;
 	options.cmdOpen = (options.cmdOpen!=undefined)? options.cmdOpen:true;
 	options.cmdClear = (options.cmdClear!=undefined)? options.cmdClear:true;
-	options.cmdAutoComplete = (options.cmdAutoComplete!=undefined)? options.cmdAutoComplete:true;
+	options.cmdAutoComplete = (options.cmdAutoComplete!=undefined)? options.cmdAutoComplete:true;	
 
 	if (options.cmdInsert){
 		options.buttonInsert = options.buttonInsert ||
@@ -81,11 +74,7 @@ function EditRef(id,options){
 				"app":options.app
 			});
 	}
-	
-	if (!options.cmdAutoComplete){
-		options.inputEnabled = false;
-	}
-	
+		
 	this.setOnSelect(options.onSelect);
 	
 	EditRef.superclass.constructor.call(this, id, options);
@@ -94,27 +83,6 @@ function EditRef(id,options){
 		throw Error(CommonHelper.format(this.ER_NO_KEY,Array[this.getName()]));
 	}
 	
-	if (options.cmdAutoComplete || options.autoComplete){
-		if (!options.acPublicMethod && options.acController){
-			options.acPublicMethod = options.acController.getPublicMethod("complete");
-		}
-		options.autoComplete = options.autoComplete || new actbAJX(
-			{"minLengthForQuery":options.acMinLengthForQuery,
-			"onSelect":options.onSelect,
-			"model":options.acModel,
-			"publicMethod":options.acPublicMethod,
-			"patternFieldId":options.acPatternFieldId,
-			"control":this,
-			"keyFields":options.acKeyFields,
-			"descrFields":options.acDescrFields,
-			"icase":options.acICase,
-			"mid":options.acMid  
-			}
-		);
-		actb(this.m_node,options.winObj,options.autoComplete);
-	}
-	
-	this.setAutoComplete(options.autoComplete);
 	this.setButtonInsert(options.buttonInsert);	
 		
 }
@@ -126,7 +94,6 @@ EditRef.prototype.KEY_INIT_ATTR = "initKeys";
 
 /* private members */
 EditRef.prototype.m_buttonInsert;
-EditRef.prototype.m_autoComplete;
 EditRef.prototype.m_keyIds;//array of key identifiers
 
 
@@ -153,14 +120,6 @@ EditRef.prototype.setButtonInsert = function(v){
 EditRef.prototype.getButtonInsert = function(){
 	return this.m_buttonInsert;
 }
-
-EditRef.prototype.setAutoComplete = function(v){
-	this.m_autoComplete = v;
-}
-EditRef.prototype.getAutoComplete = function(){
-	return this.m_autoComplete;
-}
-
 
 EditRef.prototype.setKeys = function(keys){
 	if (!CommonHelper.isEmpty(keys)){

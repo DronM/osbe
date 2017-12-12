@@ -3,18 +3,19 @@
 
  * @extends GridColumn
  * @requires controls/GridColumn.js
+ * @requires core/AppWin.js 
 
  * @class
  * @classdesc
  
  * @param {Object} options
- * @param {Field} [options.mask=DefAppMask] 
+ * @param {string} [options.mask=App.getPhoneEditMask] 
  */
-function GridColumnPhone(id,options){
+function GridColumnPhone(options){
 	options = options || {};	
 	
 	options.mask = options.mask || window.getApp().getPhoneEditMask();
-	GridColumnPhone.superclass.constructor.call(this,id,options);
+	GridColumnPhone.superclass.constructor.call(this,options);
 }
 extend(GridColumnPhone,GridColumn);
 

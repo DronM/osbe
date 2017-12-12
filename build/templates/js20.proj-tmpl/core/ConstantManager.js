@@ -48,6 +48,9 @@ ConstantManager.prototype.fillFromXML = function(xml){
 		else if (v_t == "Date"){
 			v_class = FieldDate;
 		}								
+		else if (v_t == "JSON" || v_t == "JSONB"){
+			v_class = FieldJSON;
+		}										
 		else{
 			v_class = FieldString;
 		}

@@ -80,7 +80,7 @@ function ViewList_View(id,options){
 						new GridCellHead(id+":grid:head:user_descr",{
 							"value":this.GRID_COL_CAP,
 							"columns":[
-								new GridColumn("user_descr",{"field":model.getField("user_descr")})
+								new GridColumn({"field":model.getField("user_descr")})
 							]
 						})
 					]

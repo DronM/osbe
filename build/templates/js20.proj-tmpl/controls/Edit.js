@@ -29,7 +29,15 @@
  * @param {string} options.editContClassName
  * @param {string} options.value
  * @param {bool} [options.inputEnabled=true] - direct input only,not buttons
- * @param {Function} options.formatFunction
+ * @param {Function} options.formatFunction  
+ 
+ * @param {bool} [options.cmdAutoComplete=false] 
+ * @param {int} options.acMinLengthForQuery
+ * @param {bool} options.acIc
+ * @param {bool} options.acMid
+ * @param {PublicMethod} options.acPublicMethod
+ * @param {ControllerObjServer} options.acController  
+ * @param {Model} options.acModel 
  */
 function Edit(id,options){
 	options = options || {};
@@ -53,11 +61,24 @@ function Edit(id,options){
 	}
 	*/
 	
+	if (options.inline===true){
+		options.contClassName = "";
+		options.editContClassName = "";
+		options.className = "";
+		options.btnContClassName = "";
+		options.contTagName = "SPAN";
+		options.editContTagName = "SPAN";	
+	}
+	
 	options.className = (options.className!==undefined)? options.className:this.DEF_CLASS;	
 	options.attrs.type = options.attrs.type || options.type || this.DEF_INPUT_TYPE;		
 	options.attrs.maxlength = options.attrs.maxlength || options.maxlength || ( (options.editMask)? options.editMask.length:undefined );
 	
 	this.setValidator(options.validator);
+	
+	if (options.cmdAutoComplete!=undefined && !options.cmdAutoComplete){
+		options.inputEnabled = false;
+	}
 								
 	Edit.superclass.constructor.call(this, id, options.tagName || this.DEF_TAG_NAME, options);
 			
@@ -83,6 +104,7 @@ function Edit(id,options){
 	this.setButtonSelect(options.buttonSelect);
 	this.setButtonClear(options.buttonClear);	
 	
+	this.setBtnContClassName((options.btnContClassName!=undefined)? options.btnContClassName:this.BTNS_CONTAINER_CLASS);		
 	/*
 	 * if there is any option starting with button~
 	 */
@@ -101,11 +123,34 @@ function Edit(id,options){
 	this.setContClassName( (options.contClassName!==undefined)? options.contClassName:this.DEF_CONT_CLASS );
 	this.setContTagName(options.contTagName || this.DEF_CONT_TAG);	
 	this.setEditContClassName( (options.editContClassName!==undefined)? options.editContClassName : (this.DEF_EDIT_CONT_CLASS +" "+ window.getBsCol(8)) );
-	this.setEditContTagName(options.editContTagName || this.DEF_EDIT_CONT_TAG);	
-		
+	this.setEditContTagName(options.editContTagName || this.DEF_EDIT_CONT_TAG);
+	
 	if (options.inputEnabled!=undefined && !options.inputEnabled && this.getEnabled()){
 		this.setInputEnabled(false);
-	}	
+	}
+	
+	if (options.cmdAutoComplete || options.autoComplete){
+		if (!options.acPublicMethod && options.acController){
+			options.acPublicMethod = options.acController.getPublicMethod("complete");
+		}
+		options.autoComplete = options.autoComplete || new actbAJX(
+			{"minLengthForQuery":options.acMinLengthForQuery,
+			"onSelect":options.onSelect,
+			"model":options.acModel,
+			"publicMethod":options.acPublicMethod,
+			"patternFieldId":options.acPatternFieldId,
+			"control":this,
+			"keyFields":options.acKeyFields,
+			"descrFields":options.acDescrFields,
+			"icase":options.acICase,
+			"mid":options.acMid  
+			}
+		);
+		actb(this.m_node,options.winObj,options.autoComplete);
+	}
+	
+	this.setAutoComplete(options.autoComplete);
+		
 }
 extend(Edit,Control);
 
@@ -117,7 +162,7 @@ Edit.prototype.BTNS_CONTAINER_CLASS="input-group-btn";//input-group-btn
 Edit.prototype.INCORRECT_VAL_CLASS="error";
 Edit.prototype.DEF_CONT_CLASS = "form-group";
 Edit.prototype.DEF_EDIT_CONT_CLASS = "input-group";
-Edit.prototype.DEF_CONT_TAG = "DIV";
+Edit.prototype.DEF_CONT_TAG = "DIV";//
 Edit.prototype.DEF_EDIT_CONT_TAG = "DIV";
 Edit.prototype.VAL_INIT_ATTR = "initValue";
 Edit.prototype.DEF_LABEl_ALIGN = "left";
@@ -139,12 +184,15 @@ Edit.prototype.m_formatFunction;
 Edit.prototype.m_editContTagName;
 Edit.prototype.m_enabled;
 Edit.prototype.m_labelAlign;
+Edit.prototype.m_btnContClassName;
 
 Edit.prototype.m_onKeyPress;
 
+Edit.prototype.m_autoComplete;
+
 Edit.prototype.addButtonContainer = function(){
-	this.m_buttons = new ControlContainer(this.getId()+":btn-cont","span",
-		{"className":this.BTNS_CONTAINER_CLASS,
+	this.m_buttons = new ControlContainer(this.getId()+":btn-cont","SPAN",
+		{"className":this.m_btnContClassName,
 			"enabled":this.getEnabled()
 		}
 	);	
@@ -173,13 +221,16 @@ Edit.prototype.applyMask = function(){
 		$(this.getNode()).mask(this.getEditMask());
 	}
 }
-
+Edit.prototype.formatOutputValue = function(val){
+	return val;
+}
 Edit.prototype.setValue = function(val){
 	if (this.m_validator){
 		val = this.m_validator.correctValue(val);
 	}
-	this.getNode().value = val;
-	
+	this.getNode().value = this.formatOutputValue(val);
+//	console.log("Edit.prototype.setValue val="+this.getNode().value+", "+val)
+//debugger	
 	this.applyMask();
 }
 
@@ -417,6 +468,9 @@ Edit.prototype.getEditContClassName = function(){
 Edit.prototype.setEditContClassName = function(v){
 	this.m_editContClassName = v;
 }
+Edit.prototype.setBtnContClassName = function(v){
+	this.m_btnContClassName = v;
+}
 
 Edit.prototype.getEditContTagName = function(){
 	return this.m_editContTagName;
@@ -445,6 +499,14 @@ Edit.prototype.setLabelAlign = function(v){
 Edit.prototype.getLabelAlign = function(){
 	return this.m_labelAlign;
 }
+
+Edit.prototype.setAutoComplete = function(v){
+	this.m_autoComplete = v;
+}
+Edit.prototype.getAutoComplete = function(){
+	return this.m_autoComplete;
+}
+
 
 /*
 overriden

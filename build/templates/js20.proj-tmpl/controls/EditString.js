@@ -8,9 +8,11 @@
  
  * @requires core/ValidatorString.js
  * @requires controls/Edit.js
+ * @requires controls/ButtonClear.js 
 
  * @param {string} id
- * @param {Object} options
+ * @param {object} options
+ * @param {Validator} [options.validator=ValidatorString] 
  * @param {boolean} [options.cmdClear=true]
  * @param {Button} [options.buttonClear=ButtonClear]
 

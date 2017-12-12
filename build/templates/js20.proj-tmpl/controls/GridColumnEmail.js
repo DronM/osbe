@@ -10,11 +10,11 @@
  * @param {Object} options
  * @param {Field} [options.mask=DefAppMask] 
  */
-function GridColumnEmail(id,options){
+function GridColumnEmail(options){
 	options = options || {};	
 	
 	//options.mask = 
-	GridColumnEmail.superclass.constructor.call(this,id,options);
+	GridColumnEmail.superclass.constructor.call(this,options);
 }
 extend(GridColumnEmail,GridColumn);
 

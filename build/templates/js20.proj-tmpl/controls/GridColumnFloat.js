@@ -1,25 +1,21 @@
-/* Copyright (c) 2016 
-	Andrey Mikhalevich, Katren ltd.
-*/
-/*	
-	Description
-*/
-/** Requirements
- * @requires 
- * @requires core/extend.js  
-*/
-
-/* constructor
-@param string id
-@param object options{
-
-}
-*/
-function GridColumnFloat(id,options){
+/**
+ * @author Andrey Mikhalevich <katrenplus@mail.ru>, 2016
+ * @class
+ * @classdesc Grid column Float class class
+ 
+ * @extends GridColumn
+ 
+ * @requires core/extend.js
+ * @requires controls/GridColumn.js
+ 
+ * @param {object} options
+ * @param {int} [options.precision=DEF_PRECISION]
+ */
+function GridColumnFloat(options){
 	options = options || {};	
 	
 	this.m_precision = options.precision || this.DEF_PRECISION;
-	GridColumnFloat.superclass.constructor.call(this,id,options);
+	GridColumnFloat.superclass.constructor.call(this,options);
 }
 extend(GridColumnFloat,GridColumn);
 

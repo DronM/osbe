@@ -8,8 +8,8 @@
  
  * @requires controls/EditInt.js  
  
- * @param string id 
- * @param {Object} options
+ * @param {string} id 
+ * @param {object} options
  * @param {Validator} [options.validator=ValidatorFloat]
  * @param {int} [options.precision=DEF_PRECISION] 
  */

@@ -11,14 +11,14 @@
  * @param {string} [options.dateFormat]
  */
 
-function GridColumnDateTime(id,options){
+function GridColumnDateTime(options){
 	options = options || {};	
 	
 	this.m_dateFormat = options.dateFormat ||
 		window.getApp().getDateTimeFormat() ||
 		this.DEF_FORMAT;
 	
-	GridColumnDateTime.superclass.constructor.call(this,id,options);
+	GridColumnDateTime.superclass.constructor.call(this,options);
 }
 extend(GridColumnDateTime,GridColumnDate);
 

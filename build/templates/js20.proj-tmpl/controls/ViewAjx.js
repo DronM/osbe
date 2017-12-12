@@ -196,8 +196,18 @@ ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
 		throw Error(this.ER_NO_PM);
 	}
 	
-	incorrect_vals = false;
-	modified = this.getModified(cmd);
+	var incorrect_vals = false;
+	var modified = this.getModified(cmd);
+	//var pm_modified = false;
+	if (!modified){
+		var pm_fields = pm.getFields();
+		for (var fid in pm_fields){
+			if (pm_fields[fid].isSet()){
+				modified = true;
+				break;
+			}
+		}
+	}
 	
 	this.resetError();	
 	

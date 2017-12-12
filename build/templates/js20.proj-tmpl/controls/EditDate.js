@@ -8,6 +8,7 @@
  
  * @requires core/extend.js
  * @requires controls/EditString.js       
+ * @requires core/AppWin.js      
  
  * @param string id 
  * @param {namespace} options
@@ -95,6 +96,10 @@ EditDate.prototype.getValue = function(){
 	}
 }
 
+EditDate.prototype.formatOutputValue = function(val){
+	return DateHelper.format(val,this.getDateFormat());
+}
+/*
 EditDate.prototype.setValue = function(val){
 	if (!val){
 		this.getNode().value = "";
@@ -103,13 +108,13 @@ EditDate.prototype.setValue = function(val){
 		if (this.m_validator){
 			val = this.m_validator.correctValue(val);
 		}		
-		var v = DateHelper.format(val,this.getDateFormat());
-		this.getNode().value = v; 
-		console.log("EditDate.prototype.setValue val="+v)
-		//this.applyMask();
+		var f_val = DateHelper.format(val,this.getDateFormat());
+		this.getNode().value = f_val; 
+		
+		this.applyMask();
 	}
 }
-
+*/
 EditDate.prototype.setTimeValueStr = function(v){
 	this.m_timeValueStr = v;
 }

@@ -32,7 +32,7 @@ function ConstantGrid(id,options){
 						new GridCellHead(id+":head:0:name",{
 							"value":this.LIST_COL_NAME,
 							"columns":[
-								new GridColumn("name",{
+								new GridColumn({
 								"field":options.model.getField("name"),
 								"ctrlEdit":false,
 								"ctrlOptions":{
@@ -47,7 +47,7 @@ function ConstantGrid(id,options){
 						new GridCellHead(id+":head:0:descr",{
 							"value":this.LIST_COL_DESCR,
 							"columns":[
-								new GridColumn("descr",{
+								new GridColumn({
 								"field":options.model.getField("descr"),
 								"ctrlEdit":false,
 								"ctrlOptions":{
@@ -60,7 +60,7 @@ function ConstantGrid(id,options){
 						new GridCellHead(id+":head:0:val",{
 							"value":this.LIST_COL_VAL,
 							"columns":[
-								new GridColumn("val",{"field":options.model.getField("val")})
+								new GridColumn({"field":options.model.getField("val")})
 							]
 						})						
 					]

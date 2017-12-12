@@ -167,7 +167,9 @@ actbAJX.prototype.m_descrFields;
 actbAJX.prototype.fillArrayOnPattern = function(inputNode){
 	var currValue = inputNode.value;
 	//clear ids
-	this.m_control.resetKeys();
+	if (this.m_control.resetKeys){
+		this.m_control.resetKeys();
+	}
 
 	this.m_keywords = [];
 	this.m_keywordKeys = [];
@@ -209,7 +211,10 @@ actbAJX.prototype.onGetData = function(resp){
 		return;
 	}
 	
-	var ctrl_key_ids = this.m_control.getKeyIds();
+	var ctrl_key_ids;
+	if (this.m_control.getKeyIds){
+		ctrl_key_ids = this.m_control.getKeyIds();
+	}
 	while (this.m_model.getNextRow()){
 		var res_val = "";
 		for (var fid in this.m_descrFields){
@@ -220,7 +225,8 @@ actbAJX.prototype.onGetData = function(resp){
 		
 		var keys = {};
 		for (var fn=0;fn<this.m_keyFields.length;fn++){
-			keys[ctrl_key_ids[fn]] = this.m_keyFields[fn].getValue();
+			if (ctrl_key_ids)		
+				keys[ctrl_key_ids[fn]] = this.m_keyFields[fn].getValue();
 			//keys[this.m_lookupFields[fid].getId()] = this.m_lookupFields[fid].getValue();					
 		}
 		

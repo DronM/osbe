@@ -7,7 +7,6 @@
  * @class
  * @classdesc
 
- * @param {string||namespace} id depricated syntax. new syntax - with options as the first parameter!
  * @param {object} options
  * @param {Field} options.field
  * @param {GridHeadCell} options.headCell
@@ -35,23 +34,24 @@
  * @param {Field} options.ctrlOptions 
  */
  
-function GridColumn(id,options){
-
-	if (typeof(id)=="object"){
-		//no id style
-		options = CommonHelper.clone(id);
-		if (options.field){
-			id = options.field.getId();
-		}
-		else if (options.id){
-			id = options.id;
-		}		
-		else{
-			id = CommonHelper.uniqid();
-		}
-	}
+function GridColumn(options){
 
 	options = options || {};
+	
+	if (typeof(options)!="object"){
+		throw new Error("Constructor type not supported (id,option)");
+	}		
+	
+	var id;
+	if (options.id){
+		id = options.id;
+	}
+	else if (options.field){
+		id = options.field.getId();
+	}
+	else{
+		id = CommonHelper.uniqid();
+	}
 	
 	this.m_id = id;
 	options.ctrlId = id;

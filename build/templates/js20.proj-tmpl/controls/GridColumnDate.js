@@ -1,21 +1,18 @@
-/* Copyright (c) 2016 
-	Andrey Mikhalevich, Katren ltd.
-*/
-/*	
-	Description
-*/
-/** Requirements
- * @requires 
- * @requires core/extend.js  
-*/
+/**	
+ * @author Andrey Mikhalevich <katrenplus@mail.ru>, 2016
 
-/* constructor
-@param string id
-@param object options{
+ * @extends GridColumn
+ * @requires controls/GridColumn.js
+ * @requires core/AppWin.js 
 
-}
-*/
-function GridColumnDate(id,options){
+ * @class
+ * @classdesc
+
+ * @param {string||namespace} id depricated syntax. new syntax - with options as the first parameter!
+ * @param {object} options
+ * @param {string} options.dateFormat
+ */
+function GridColumnDate(options){
 	options = options || {};	
 	
 	this.m_dateFormat =
@@ -23,7 +20,7 @@ function GridColumnDate(id,options){
 		window.getApp().getDateFormat() ||
 		this.DEF_FORMAT;
 	
-	GridColumnDate.superclass.constructor.call(this,id,options);
+	GridColumnDate.superclass.constructor.call(this,options);
 }
 extend(GridColumnDate,GridColumn);
 

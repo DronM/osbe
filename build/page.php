@@ -81,7 +81,7 @@
 		$struc = array();
 		$proj_man->getVersion($struc);
 							
-		$proj_man->createVersionFile($struc['version'],$log);						
+		$proj_man->createVersionFile(trim($struc['version']),$log);						
 		$proj_man->build($log);						
 		$proj_man->minifyJs($struc['version'],$log);
 		$proj_man->minifyCSS($struc['version'],$log);

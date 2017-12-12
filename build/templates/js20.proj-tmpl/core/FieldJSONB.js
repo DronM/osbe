@@ -8,7 +8,7 @@
  * @classdesc
  
  * @param {string} id - Field identifier
- * @param {namespace} options
+ * @param {object} options
  */
 function FieldJSONB(id,options){
 	options = options || {};
