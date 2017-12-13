@@ -105,3 +105,7 @@
 2.1.13
 	09/12/2017
 	js GridColumn contstructor only one syntax support
+	
+2.1.14 13/12/2017
+	ControllerDb signature of functions insert,delete,update is compatible with derived mwthods ,i.e insert($pm)
+	signature of write() of classes View,ViewPDF,viewHTML,ViewExcel,ViewJSForm(? depricated),ViewJSON

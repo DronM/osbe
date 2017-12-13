@@ -2,10 +2,11 @@
 require_once(FRAME_WORK_PATH.'basic_classes/View.php');
 
 class ViewXML extends View{	
-	public function write(ArrayObject $models){
+
+	public function write(ArrayObject &$models,$errorCode=NULL){
 		ob_clean();		
 		header('Content-Type: text/xml; charset="utf-8"');
-		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");  // disable IE caching
+		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");  // disable caching
 		header("Last-Modified: " . gmdate( "D, d M Y H:i:s") . " GMT");
 		header("Cache-Control: no-cache, must-revalidate");
 		header("Pragma: no-cache");

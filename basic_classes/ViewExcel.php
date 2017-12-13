@@ -1,14 +1,14 @@
 <?php
 require_once(FRAME_WORK_PATH.'basic_classes/View.php');
 require_once('common/downloader.php');
-//ф
+
 class ViewExcel extends View{	
 	const DEF_TEMPL_NAME = 'ModelsToExcel';
 	const DEF_TEMPL_PATH = 'basic_classes/xslt/';
 	const TEMPL_EXT = ".xls.xsl";
 	const ER_TEMPL_NOT_FOUND = "Template not found.";
 	
-	public function write(ArrayObject $models){
+	public function write(ArrayObject &$models,$errorCode=NULL){
 		ob_clean();		
 		
 		if (isset($_REQUEST['templ'])

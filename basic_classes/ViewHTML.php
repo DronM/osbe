@@ -4,7 +4,6 @@ require_once(FRAME_WORK_PATH.'basic_classes/ModelStyleSheet.php');
 require_once(FRAME_WORK_PATH.'basic_classes/ModelJavaScript.php');
 require_once(FRAME_WORK_PATH.'basic_classes/ModelVars.php');
 
-//ф
 class ViewHTML extends View{	
 	private $varModel;
 	private $cssModels=array();

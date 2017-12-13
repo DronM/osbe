@@ -5,7 +5,7 @@
 
 require_once(USER_VIEWS_PATH.'ViewBase.php');
 require_once(FRAME_WORK_PATH.'basic_classes/XSLTStyler.php');
-//ф
+
 class ViewJSForm extends ViewBase{	
 	const ER_ARG_MIS = 'Java script view class not defind.';
 	const TEMPL_PATH = 'basic_classes/xslt/';
@@ -22,7 +22,7 @@ class ViewJSForm extends ViewBase{
 		$this->getVarModel()->insert();
 		$this->setVarValue('jsViewId',$_REQUEST[ViewJSForm::PARAM_ID]);
 	}
-	public function write(ArrayObject &$models){
+	public function write(ArrayObject &$models,$errorCode=NULL){
 		if (!file_exists($xslt_file=USER_VIEWS_PATH.
 				ViewJSForm::TEMPL_NAME)){
 			$pathArray = explode(PATH_SEPARATOR, get_include_path());

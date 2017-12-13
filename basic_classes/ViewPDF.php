@@ -10,7 +10,7 @@ class ViewPDF extends View{
 	const TEMPL_EXT = ".pdf.xsl";
 	const ER_FILE_NOT_FOUND = 'Ошибка формирования PDF.';
 	
-	public function write(ArrayObject $models){
+	public function write(ArrayObject &$models,$errorCode=NULL){
 		ob_clean();		
 
 		if (isset($_REQUEST['templ'])

@@ -93,7 +93,9 @@ function ViewObjectAjx(id,options){
 	}
 	
 	//commands
-	this.m_commandContainer = options.commandContainer || new ControlContainer(id+":cmd-cont","div",{"elements":options.commandElements});
+	if (options.commandContainer || options.commandElements || options.cmdOk || options.cmdSave || options.cmdCancel || options.cmdPrint){
+		this.m_commandContainer = options.commandContainer || new ControlContainer(id+":cmd-cont","DIV",{"elements":options.commandElements});
+	}
 		
 	//Commands
 	/*
@@ -184,10 +186,12 @@ ViewObjectAjx.prototype.keyPressEvent = function(keyCode,event){
 
 /* protected*/
 ViewObjectAjx.prototype.addControls = function(){
-	if (this.m_controlOK) this.m_commandContainer.addElement(this.m_controlOK);
-	if (this.m_controlSave) this.m_commandContainer.addElement(this.m_controlSave);
-	if (this.m_controlPrint)this.m_commandContainer.addElement(this.m_controlPrint);
-	if (this.m_controlCancel) this.m_commandContainer.addElement(this.m_controlCancel);	
+	if (this.m_commandContainer){
+		if (this.m_controlOK) this.m_commandContainer.addElement(this.m_controlOK);
+		if (this.m_controlSave) this.m_commandContainer.addElement(this.m_controlSave);
+		if (this.m_controlPrint)this.m_commandContainer.addElement(this.m_controlPrint);
+		if (this.m_controlCancel) this.m_commandContainer.addElement(this.m_controlCancel);	
+	}
 }
 
 
@@ -250,7 +254,7 @@ ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 		}
 	}
 	else{
-		//after insert no keys
+		//after insert/update no keys
 		for (var i=0;i<this.m_dataBindings.length;i++){
 			this.defineField(i);
 			var f = this.m_dataBindings[i].getField();			
@@ -270,6 +274,7 @@ ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 							break;
 						}
 					}
+					//console.log("ViewObjectAjx.prototype.onAfterUpsert fieldId="+f.getId()+" Val="+val)
 					f.setValue(val);
 				}
 			}
@@ -361,7 +366,7 @@ ViewObjectAjx.prototype.setWriteTempDisabled = function(cmd){
 ViewObjectAjx.prototype.toDOM = function(parent){
 	ViewObjectAjx.superclass.toDOM.call(this,parent);
 	
-	this.m_commandContainer.toDOM(parent);
+	if (this.m_commandContainer)this.m_commandContainer.toDOM(parent);
 	
 	this.addKeyEvents();
 	
@@ -372,7 +377,7 @@ ViewObjectAjx.prototype.toDOM = function(parent){
 
 ViewObjectAjx.prototype.delDOM = function(){
 	this.delKeyEvents();	
-	this.m_commandContainer.delDOM();
+	if (this.m_commandContainer)this.m_commandContainer.delDOM();
 	ViewObjectAjx.superclass.delDOM.call(this);	
 }
 

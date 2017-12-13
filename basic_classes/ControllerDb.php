@@ -190,23 +190,23 @@ class ControllerDb extends Controller{
 	public function afterUnSetFilter(){
 	}
 	
-	/*
-		public method realization
-	*/
+	/**
+	 *	public method realization
+	 */
 	
-	/*
-		Makes insert command on a model defined
-		in insertModelId
-	*/
-	public function insert(){
+	/**
+	 *	Makes insert command on a model defined
+	 *	in insertModelId
+	 */
+	public function insert($pm){
 		if (!$this->getStatelessClient()){
 			//STATE client - ajax
 			$model_id = $this->getInsertModelId();
 			if (!isset($model_id)){
 				throw new Exception(self::ER_NO_INSERT_MODEL);
 			}
-			$meth = $this->getPublicMethod(ControllerDb::METH_INSERT);
-			$need_id = ($meth->getParamValue('ret_id')==1);
+			//$pm = $this->getPublicMethod(ControllerDb::METH_INSERT);
+			$need_id = ($pm->getParamValue('ret_id')==1);
 			$model = new $model_id($this->getDbLinkMaster());
 			
 			//always return inserted ids
@@ -304,7 +304,7 @@ class ControllerDb extends Controller{
 			
 		}
 	}
-	public function update(){
+	public function update($pm){
 		if (!$this->getStatelessClient()){
 			//STATE client - ajax		
 			$model_name = $this->getUpdateModelId();
@@ -315,8 +315,11 @@ class ControllerDb extends Controller{
 				new $model_name($this->getDbLinkMaster()));	
 		}
 		else{
+			/**
+			 * Depricated not used
+			 */
 			$e = NULL;
-			$meth_update = $this->getPublicMethod(ControllerDb::METH_UPDATE);			
+			//$meth_update = $this->getPublicMethod(ControllerDb::METH_UPDATE);			
 			$list_model_name = $this->getListModelId();							
 			if (!isset($list_model_name)){
 				throw new Exception(ControllerDb::ER_NO_LIST_MODEL);
@@ -337,13 +340,13 @@ class ControllerDb extends Controller{
 				//copy params values from update method
 				$meth_get_list->setParamValue(
 					'from',
-					$meth_update->getParamValue('from'));								
+					$pm->getParamValue('from'));								
 				$this->modelGetList($list_model);
 			}
 			catch (Exception $e){
 				$browse_mode = BROWSE_MODE_EDIT;
 				/* if error - always edit mode */
-				$obj_mode = ($meth_update->getParamValue('obj_mode')==1);
+				$obj_mode = ($pm->getParamValue('obj_mode')==1);
 				if ($obj_mode){
 					//object mode
 					$object_model_name = $this->getObjectModelId();
@@ -356,7 +359,7 @@ class ControllerDb extends Controller{
 					$object_model = new $object_model_name($this->getDbLink());
 					//ToDo multy id
 					$object_model->setParamValue('browse_id',
-						$meth_update->getParamValue('old_id')
+						$pm->getParamValue('old_id')
 					);
 					$this->modelGetObject($object_model);								
 					$fields = $object_model->getFieldIterator();
@@ -370,7 +373,7 @@ class ControllerDb extends Controller{
 					//copy params values from update method
 					$meth_get_list->setParamValue(
 						'from',
-						$meth_update->getParamValue('from'));								
+						$pm->getParamValue('from'));								
 						
 					$this->modelGetList($list_model);
 					$fields = $list_model->getFieldIterator();
@@ -391,7 +394,8 @@ class ControllerDb extends Controller{
 		
 		}
 	}
-	public function delete(){
+	
+	public function delete($pm){
 		if (!$this->getStatelessClient()){
 			$model_name = $this->getDeleteModelId();
 			if (!isset($model_name)){
@@ -401,6 +405,9 @@ class ControllerDb extends Controller{
 				new $model_name($this->getDbLinkMaster()));	
 		}
 		else{
+			/**
+			 * Depricated not used
+			 */		
 			$e = NULL;
 			try{
 				$model_name = $this->getDeleteModelId();
@@ -431,6 +438,7 @@ class ControllerDb extends Controller{
 				throw new Exception($e->getMessage());						
 		}
 	}
+	
 	public function get_list($pm){
 		$model_name = $this->getListModelId();
 		if (!isset($model_name)){
@@ -477,6 +485,7 @@ class ControllerDb extends Controller{
 			}
 		}
 	}
+	
 	public function get_object($pm){
 		$model_name = $this->getObjectModelId();
 		if (!isset($model_name)){
@@ -509,6 +518,7 @@ class ControllerDb extends Controller{
 		}
 		
 	}
+	
 	//extra params for stateless client
 	public function setStatelessClient($statelessClient){
 		parent::setStatelessClient($statelessClient);
@@ -536,7 +546,7 @@ class ControllerDb extends Controller{
 			
 		}
 	}
-	public function complete(){
+	public function complete($pm){
 		$model_name = $this->getCompleteModelId();
 		if (!isset($model_name)){
 			throw new Exception(ControllerDb::ER_NO_COMLETE_MODEL);

@@ -1,5 +1,6 @@
 <?php
 require_once(FRAME_WORK_PATH.'basic_classes/View.php');
+
 class ViewJSON extends View{	
 	const ER_TEMPL_NOT_FOUND = 'Template not found.';
 	const DEF_TEMPL_PATH = 'basic_classes/xslt/';
@@ -9,7 +10,7 @@ class ViewJSON extends View{
 		parent::__construct($id);
 	}
 	
-	public function write(ArrayObject &$models){
+	public function write(ArrayObject &$models,$errorCode=NULL){
 		ob_clean();		
 		header('Content-Type: application/json; charset="utf-8"');
 		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");  // disable IE caching

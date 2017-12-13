@@ -14,7 +14,7 @@ class View {
 		$this->id = $id;
 	}
 	
-	public function write(ArrayObject $models,$errorCode=NULL){
+	public function write(ArrayObject &$models,$errorCode=NULL){
 	}
 }
 

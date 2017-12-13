@@ -44,8 +44,9 @@ function MainMenuTree(id,options){
 					new GridCellHead(id+":content-tree:head:descr",{
 						"className":window.getBsCol(6),
 						"columns":[
-							new GridColumn("descr",{
+							new GridColumn({
 								"model":options.model,
+								"field":options.model.getField("descr"),
 								"cellOptions":{
 									"tagName":"SPAN"									
 								},
@@ -56,7 +57,8 @@ function MainMenuTree(id,options){
 									"editContClassName":"input-group "+window.getBsCol(10)
 								}
 							}),
-							new GridColumn("viewdescr",{
+							new GridColumn({
+								"field":options.model.getField("viewdescr"),
 								"model":options.model,
 								"cellOptions":{"tagName":"SPAN"},
 								"ctrlClass":ViewEditRef,
@@ -70,7 +72,8 @@ function MainMenuTree(id,options){
 									"menuTree":this
 								}								
 							}),
-							new GridColumn("glyphclass",{
+							new GridColumn({
+								"field":options.model.getField("glyphclass"),
 								"model":options.model,
 								"cellOptions":{
 									"tagName":"SPAN"									
@@ -83,7 +86,8 @@ function MainMenuTree(id,options){
 								}
 							}),
 							
-							new GridColumn("default",{
+							new GridColumn({
+								"field":options.model.getField("default"),
 								"assocClassList":{"true":"glyphicon glyphicon-ok"},
 								"model":options.model,
 								"cellOptions":{"tagName":"SPAN"},

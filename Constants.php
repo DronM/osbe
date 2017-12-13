@@ -67,5 +67,5 @@ define('ERR_COM_NO_VIEW', 'Вид не определен.@12');
 //DB
 define('ERR_DELETE_CONSTR_VIOL', 'Удаление невозможно, так как существуют ссылки.@500');
 
-define('FW_VERSION', '2.1.12');
+define('FW_VERSION', '2.1.14');
 ?>
