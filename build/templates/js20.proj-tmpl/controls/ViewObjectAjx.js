@@ -40,10 +40,10 @@ function ViewObjectAjx(id,options){
 		})
 	);	
 	
+	this.setCmd(options.cmd);
 	
 	this.m_detailDataSets = {};
-		
-	this.setCmd(options.cmd);
+			
 	this.setOnClose(options.onClose);
 	
 	if (!options.readPublicMethod && options.controller){
@@ -57,7 +57,8 @@ function ViewObjectAjx(id,options){
 	
 	var self = this;
 		
-	if ( options.controlOk || ((options.cmdOk!=undefined)? options.cmdOk:true) ){
+	options.cmdOk = (options.cmdOk!=undefined)? options.cmdOk:true;
+	if ( options.controlOk || options.cmdOk){
 		this.setControlOK(options.controlOk || new ButtonOK(id+":cmdOk",
 			{"onClick":function(){
 				self.onOK();
@@ -66,7 +67,8 @@ function ViewObjectAjx(id,options){
 		);
 	}
 
-	if ( options.controlSave || ((options.cmdSave!=undefined)? options.cmdSave:true) ){
+	options.cmdSave = (options.cmdSave!=undefined)? options.cmdSave:true;
+	if ( options.controlSave || options.cmdSave ){
 		this.setControlSave(options.controlSave || new ButtonSave(id+":cmdSave",
 			{"onClick":function(){
 				self.onSave();
@@ -75,7 +77,8 @@ function ViewObjectAjx(id,options){
 		);
 	}
 	
-	if ( options.controlCancel || ((options.cmdCancel!=undefined)? options.cmdCancel:true) ){
+	options.cmdCancel = (options.cmdCancel!=undefined)? options.cmdCancel:true;
+	if ( options.controlCancel || options.cmdCancel ){
 		this.setControlCancel(options.controlCancel || new ButtonCancel(id+":cmdCancel",{
 			"onClick":function(){
 				self.onCancel();
@@ -154,14 +157,18 @@ ViewObjectAjx.prototype.m_detailDataSets;
 
 ViewObjectAjx.prototype.addKeyEvents = function(){
 	for (var elem_id in this.m_elements){
-		EventHelper.add(this.m_elements[elem_id].getNode(),"keydown",this.m_keyEvent,false);
+		if (this.m_elements[elem_id] && this.m_elements[elem_id].setInitValue){
+			EventHelper.add(this.m_elements[elem_id].getNode(),"keydown",this.m_keyEvent,false);
+		}
 	}
 	
 }
 
 ViewObjectAjx.prototype.delKeyEvents = function(){
 	for (var elem_id in this.m_elements){
-		EventHelper.del(this.m_elements[elem_id].getNode(),"keydown",this.m_keyEvent,false);
+		if (this.m_elements[elem_id] && this.m_elements[elem_id].setInitValue){
+			EventHelper.del(this.m_elements[elem_id].getNode(),"keydown",this.m_keyEvent,false);
+		}
 	}	
 }
 
@@ -213,7 +220,7 @@ ViewObjectAjx.prototype.close = function(res){
 /**
  * @param {ServResp} resp
  * @param {boolean} initControls whethear to set controls' init values 
- *
+ * if form is not going to be closed initControls=true for modifying form controls
  */
 ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 	/** All fields from response to model and controls
@@ -224,21 +231,41 @@ ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 		this.m_editResult.newKeys = {};
 		var model_obj_class = this.getWritePublicMethod().getController().getObjModelClass();
 		var ret_model = new model_obj_class({"data":resp.getModelData("InsertedId_Model")});
+		
+		var base_model_class;
+		if (ret_model instanceof ModelXML){
+			base_model_class = ModelXML;
+		}
+		else if (ret_model instanceof ModelJSON){
+			base_model_class = ModelJSON;
+		}
+		else{
+			throw Error(this.ER_UNSUPPORTED_BASE_MODEL);
+		}	
+		//console.dir(resp.getModelData("InsertedId_Model"))		
+		var ret_model_serv = new base_model_class("InsertedId_Model",{"data":resp.getModelData("InsertedId_Model")});
+		if (ret_model_serv.getNextRow()){
+			ret_model_serv_fields = ret_model_serv.getFields();
+		}
+		
 		ret_model.getNextRow();//first
 		var ret_fields = ret_model.getFields();
 		
-		for (ret_id in ret_fields){
-			if (ret_fields[ret_id].isSet()){
+		for (ret_id in ret_model_serv_fields){
+			if (ret_model_serv_fields[ret_id].isSet() && ret_fields[ret_id]){
 				this.m_editResult.newKeys[ret_id] = ret_fields[ret_id].getValue();
 			}
+			
 		}
 		if (initControls){
+			/* write bindings are not updated!!?? */
 			for (var i=0;i<this.m_dataBindings.length;i++){
 				this.defineField(i);
 				var f = this.m_dataBindings[i].getField();
-				if (f){			
+				if (f){		
+					//update controls whoose fields have come from server
 					var val;
-					if (ret_fields[f.getId()] && ret_fields[f.getId()].isSet()){
+					if (ret_model_serv_fields[f.getId()] && ret_fields[f.getId()] && ret_fields[f.getId()].isSet()){
 						val = ret_fields[f.getId()].getValue();
 					}
 					else{
@@ -248,6 +275,7 @@ ViewObjectAjx.prototype.onAfterUpsert = function(resp,initControls){
 					if (this.m_dataBindings[i].getControl().setInitValue){
 						this.m_dataBindings[i].getControl().setInitValue(val);
 					}
+					//console.log("ViewObjectAjx.prototype.onAfterUpsert setting "+f.getId()+" to "+val)
 					f.setValue(val);
 				}
 			}
@@ -364,13 +392,12 @@ ViewObjectAjx.prototype.setWriteTempDisabled = function(cmd){
 
 /* public methods */
 ViewObjectAjx.prototype.toDOM = function(parent){
-	ViewObjectAjx.superclass.toDOM.call(this,parent);
+//console.log("ViewObjectAjx.prototype.toDOM getCmd="+this.getCmd())
+	ViewObjectAjx.superclass.toDOM.call(this,parent,this.getCmd());
 	
 	if (this.m_commandContainer)this.m_commandContainer.toDOM(parent);
 	
 	this.addKeyEvents();
-	
-	//this.onGetData();
 	
 	this.setDefRefVals();
 }
@@ -452,18 +479,18 @@ ViewObjectAjx.prototype.setCmd = function(v){
 	this.m_cmd = v;
 }
 ViewObjectAjx.prototype.getCmd = function(){
-	if (this.m_cmd!=undefined){
-		return this.m_cmd;
+	if (!this.m_cmd && window.getParam){
+		this.m_cmd = window.getParam("cmd");
 	}
-	else if (window.getParam){
-		return window.getParam("cmd");
+	else if (!this.m_cmd){
+		this.m_cmd = "edit";
 	}
+	return this.m_cmd;
 }
 
 ViewObjectAjx.prototype.setWritePublicMethodOnController = function(){	
 	if (this.m_controller){
 		var frm_cmd = this.getCmd();
-		
 		if (frm_cmd){
 			this.setWritePublicMethod(
 				this.m_controller.getPublicMethod(
@@ -485,7 +512,6 @@ ViewObjectAjx.prototype.getController = function(){
 }
 
 ViewObjectAjx.prototype.onSaveOk = function(resp){
-	//this.onGetData();
 	/** update controls from server response
 	*/
 	this.onAfterUpsert(resp,true);
@@ -573,15 +599,17 @@ ViewObjectAjx.prototype.setDetailKey = function(){
 }
 
 ViewObjectAjx.prototype.onGetData = function(resp,cmd){
-
+	cmd = (cmd===undefined)? this.getCmd() : ((cmd===true)? "copy":cmd);
+//console.log("ViewObjectAjx.prototype.onGetData cmd="+cmd+" getCmd="+this.getCmd())
 	ViewObjectAjx.superclass.onGetData.call(this,resp,cmd);
 	
+	/*
 	if (!cmd && !window.getParam && this.m_dataBindings.length){
 		var m = this.m_dataBindings[0].getModel();
 		cmd = (m.getRowCount())? "edit":"insert";
-	}
-	
+	}	
 	this.setCmd(cmd);
+	*/
 	
 	if (!CommonHelper.isEmpty(this.m_detailDataSets)){
 		this.setDetailKey();
@@ -664,11 +692,13 @@ ViewObjectAjx.prototype.setDataBindings = function(bindings){
 	if (this.m_model){
 		var bd_ids = [];
 		for (var b_ind=0;b_ind<bindings.length;b_ind++){
-			if (!bindings[b_ind].getModel()){
-				bindings[b_ind].setModel(this.m_model);
-			}
-			if (bindings[b_ind].getControl()){
-				bd_ids.push(bindings[b_ind].getControl().getName());
+			if (bindings[b_ind]){
+				if (!bindings[b_ind].getModel()){
+					bindings[b_ind].setModel(this.m_model);
+				}
+				if (bindings[b_ind].getControl()){
+					bd_ids.push(bindings[b_ind].getControl().getName());
+				}
 			}
 		}
 		
@@ -711,16 +741,32 @@ ViewObjectAjx.prototype.setWriteBindings = function(bindings,cmd){
 		for (var b_ind=0;b_ind<bindings.length;b_ind++){
 			//bindings[b_ind] && 
 			//console.log("IND="+b_ind)
-			if (bindings[b_ind].getControl()){
-				bd_ids.push(bindings[b_ind].getControl().getName());
+			var f_id;
+			if (!bindings[b_ind]){
+				throw new Error("ViewObjectAjx::setWriteBindings field index="+b_ind+". Field not defined!")
+			}
+			if (bindings[b_ind].getField()){
+				f_id = bindings[b_ind].getField().getId();
+			}
+			else if (bindings[b_ind].getFieldId()){
+				f_id = bindings[b_ind].getFieldId();
+			}
+			else if (bindings[b_ind].getControl()){
+				f_id = bindings[b_ind].getControl().getName();				
+			}
+			if (f_id){
+				bd_ids.push(f_id);
 			}
 		}
 		
 		var fields = this.m_model.getFields();
+		//console.dir(bd_ids)
 		for (var f in fields){
 			if (fields[f].getPrimaryKey()){
+				//console.log("PrimaryKeyField "+f)
 				if (CommonHelper.inArray(f,bd_ids)<0){
 					//missing
+					//console.log("Added missing primary key to write binding "+f)
 					bindings.push(new CommandBinding({
 						"control":this.getElement(f),
 						"fieldId":f
@@ -729,10 +775,13 @@ ViewObjectAjx.prototype.setWriteBindings = function(bindings,cmd){
 			}
 		}
 	}
-	
-	this.getCommands()[ ( (cmd)? cmd:this.CMD_OK ) ].setBindings(bindings);
+	this.getCommands()[ ( (cmd)? cmd:this.CMD_OK ) ].setBindings(bindings);	
 }
 
 ViewObjectAjx.prototype.getCommandContainer = function(){
 	return this.m_commandContainer;
+}
+
+ViewObjectAjx.prototype.getRefType = function(){
+	//return new RefType("dataType":this.m_dataType,"")
 }

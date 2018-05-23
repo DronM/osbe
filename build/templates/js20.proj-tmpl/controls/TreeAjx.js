@@ -237,11 +237,11 @@ TreeAjx.prototype.onGetData = function(){
 				ADDED CODE
 			 */			
 			var item_id = this.m_model.getFieldValue(key_field_id);			
-			debugger
+			
 			var parent_item_id = this.m_model.getParentId();
 			this.m_itemIds[item_id] = new ControlContainer(row.getId()+":gr","UL",{});
 			row.addElement(this.m_itemIds[item_id]);
-
+//console.log("parent_item_id="+parent_item_id)
 			if (parent_item_id){
 				this.m_itemIds[parent_item_id].addElement(row);
 			}

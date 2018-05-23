@@ -13,6 +13,10 @@
 <xsl:otherwise>ModelXML</xsl:otherwise>
 </xsl:choose>
 </xsl:variable>/**	
+ *
+ * THIS FILE IS GENERATED FROM TEMPLATE build/templates/models/Model_js.xsl
+ * ALL DIRECT MODIFICATIONS WILL BE LOST WITH THE NEXT BUILD PROCESS!!!
+ *
  * @author Andrey Mikhalevich &lt;katrenplus@mail.ru>, 2017
  * @class
  * @classdesc Model class. Created from template build/templates/models/Model_js.xsl. !!!DO NOT MODEFY!!!
@@ -31,6 +35,10 @@ function <xsl:value-of select="$model_id"/>(options){
 	options = options || {};
 	
 	options.fields = {};
+	<xsl:if test="@baseModelId">
+		<xsl:variable name="base_model_id" select="@baseModelId"/>
+		<xsl:apply-templates select="/metadata/models/model[@id=$base_model_id]/field"/>		
+	</xsl:if>	
 	<xsl:apply-templates/>
 	
 	<xsl:value-of select="$model_id"/>.superclass.constructor.call(this,id,options);
@@ -43,7 +51,7 @@ extend(<xsl:value-of select="$model_id"/>,<xsl:value-of select="$parent_class"/>
 	<xsl:variable name="baseModelId" select="../@baseModelId"/>
 	<xsl:variable name="fieldId" select="@id"/>
 	<xsl:variable name="baseField" select="/metadata/models/model[@id=$baseModelId]/field[@id=$fieldId]"/>
-	
+	<xsl:if test="not($baseModelId) or not($baseField)">
 	<xsl:variable name="dataType">	
 	<xsl:choose>
 	<xsl:when test="../@virtual='TRUE' and $baseModelId and not(@dataType)"><xsl:value-of select="$baseField/@dataType"/></xsl:when>
@@ -154,10 +162,13 @@ extend(<xsl:value-of select="$model_id"/>,<xsl:value-of select="$parent_class"/>
 	<xsl:if test="not($fixLength='')">
 		<xsl:value-of select="$field"/>.getValidator().setFixLength('<xsl:value-of select="$fixLength"/>');
 	</xsl:if>
-	
+	</xsl:if>
 </xsl:template>
 
 <xsl:template match="model/index">
+</xsl:template>
+
+<xsl:template match="model/predefinedItems">
 </xsl:template>
 
 <xsl:template name="boolToScript">

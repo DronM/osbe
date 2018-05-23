@@ -31,6 +31,7 @@ define("DT_ARRAY", 23);
 define("DT_XML", 24);
 define("DT_INT_BIG", 25);
 define("DT_INT_SMALL", 26);
+define("DT_BYTEA", 27);
 
 //Field types
 define("FT_DATA", 0);
@@ -66,6 +67,8 @@ define('ERR_COM_NO_VIEW', 'Вид не определен.@12');
 
 //DB
 define('ERR_DELETE_CONSTR_VIOL', 'Удаление невозможно, так как существуют ссылки.@500');
+
+define('HEADER_404','HTTP/1.0 404 Not Found');
 
 define('FW_VERSION', '2.1.14');
 ?>

@@ -115,6 +115,7 @@ ServConnector.prototype.queryParamsAsStr = function(params,encode){
  * @param {boolean} [async=true]
  * @param {function} onReturn
  * @param {function} retContentType - expected return type in content-type
+ * @param {string} [enctype=ENCODED] - post form encoding ENCODED || MULTIPART || TEXT
  */
 ServConnector.prototype.sendRequest = function(isGet,params,async,onReturn,retContentType,enctype){
 	this.m_requestId = CommonHelper.uniqid();
@@ -227,10 +228,18 @@ ServConnector.prototype.sendRequest = function(isGet,params,async,onReturn,retCo
 		}
 		if (enctype==this.ENCTYPES.MULTIPART){
 			if (typeof FormData !== 'undefined'){
-				xhr.setRequestHeader("Content-Type", enctype);
+				//xhr.setRequestHeader("Content-Type", enctype);+boundary Let browser handle it!
 				send_param = new FormData();
 				for (var par_id in params){
-					send_param.append(par_id,params[par_id]);
+					if (params[par_id] && typeof params[par_id]=="object"){						
+						//files
+						for (var fi=0;fi<params[par_id].length;fi++){
+							send_param.append(par_id+"[]",params[par_id][fi]);
+						}
+					}
+					else{
+						send_param.append(par_id,params[par_id]);
+					}
 				}
 			}
 			else{
@@ -240,7 +249,7 @@ ServConnector.prototype.sendRequest = function(isGet,params,async,onReturn,retCo
 				var boundaryLast = '--' + boundary + '--\r\n';
 				send_param = ['\r\n'];
 				for (var key in params) {
-				  send_param.push('Content-Disposition: form-data; name="' + key + '"\r\n\r\n' + params[key] + '\r\n');
+					send_param.push('Content-Disposition: form-data; name="' + key + '"\r\n\r\n' + params[key] + '\r\n');
 				}
 				send_param = send_param.join(boundaryMiddle) + boundaryLast;
 				xhr.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);				
@@ -276,6 +285,7 @@ ServConnector.prototype.sendRequest = function(isGet,params,async,onReturn,retCo
 
 /* in case of Post is a structure of parameters!*/
 ServConnector.prototype.sendPost = function(params,async,onReturn,retContentType,enctype){	
+//console.log("ServConnector.prototype.sendPost enctype="+enctype)
 	return this.sendRequest(false,params,async,onReturn,retContentType,enctype);
 }
 ServConnector.prototype.sendGet = function(params,async,onReturn,retContentType){

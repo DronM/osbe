@@ -14,6 +14,8 @@ function FieldDateTimeTZ(id,options){
 	options = options || {};
 	options.dataType = this.DT_DATETIMETZ;
 	
+	this.XHR_FORMAT = "Y-m-dTH:i:s"+window.getApp().getTimeZoneOffsetStr();
+	
 	FieldDateTimeTZ.superclass.constructor.call(this,id,options);
 }
 extend(FieldDateTimeTZ,FieldDateTime);

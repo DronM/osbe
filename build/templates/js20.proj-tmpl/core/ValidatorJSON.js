@@ -17,5 +17,10 @@ function ValidatorJSON(options){
 extend(ValidatorJSON,Validator);
 
 ValidatorJSON.prototype.correctValue = function(v){
-	return CommonHelper.unserialize(v);//eval
+	/*
+	var uns_v = CommonHelper.unserialize(v);
+	console.log("ValidatorJSON.prototype.correctValue value="+v)
+	console.dir(uns_v);
+	*/
+	return CommonHelper.unserialize(v);
 }

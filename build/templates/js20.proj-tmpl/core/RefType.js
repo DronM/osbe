@@ -14,7 +14,8 @@ function RefType(options){
 	options = options || {};	
 
 	this.setKeys(options.keys);
-	this.setDescr(options.descr);		
+	this.setDescr(options.descr);
+	this.setDataType(options.dataType);
 }
 
 /* Constants */
@@ -23,6 +24,7 @@ function RefType(options){
 /* private members */
 RefType.prototype.m_keys;
 RefType.prototype.m_descr;
+RefType.prototype.m_dataType;
 
 /* protected*/
 
@@ -40,6 +42,13 @@ RefType.prototype.setDescr = function(v){
 RefType.prototype.getDescr = function(){
 	return this.m_descr;
 }
+RefType.prototype.setDataType = function(v){
+	this.m_dataType = v;
+}
+RefType.prototype.getDataType = function(){
+	return this.m_dataType;
+}
+
 RefType.prototype.getKey = function(v){
 	var val;
 	if (this.m_keys && v){
@@ -55,17 +64,26 @@ RefType.prototype.getKey = function(v){
 	return val;
 }
 
-RefType.prototype.isNull = function(){
-	return CommonHelper.isEmpty(this.getKeys());
+RefType.prototype.isNull = function(){	
+	var k = this.getKeys();
+	var r = (k==undefined);
+	if (!r){
+		for(v in k){
+			r = (k[v]===null);
+			if (r){			
+				break;
+			}
+		}
+	}
+	return r;
 }
 
 RefType.prototype.toJSON = function(){
 	//return {"keys":this.getKeys(),"descr":this.getDescr()};
 	return {
-		"RefType":{
-			"keys":this.getKeys(),
-			"descr":this.getDescr()
-		}
+		"keys":this.getKeys(),
+		"descr":this.getDescr(),
+		"dataType":this.getDataType()
 	}
 	;
 }

@@ -33,3 +33,8 @@ extend(EditString,Edit);
 /* constants */
 
 /* public methods */
+EditString.prototype.setValue = function(val){
+	if (val==undefined)return;
+	EditString.superclass.setValue.call(this,val);
+}
+

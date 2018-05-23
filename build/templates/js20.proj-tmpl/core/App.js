@@ -17,16 +17,16 @@ function App(id,options){
 	this.setId(id);
 	
 	options = options || {};	
+	options.servVars = options.servVars || {};
+		
+	var host = options.servVars.basePath || window.location.hostname || "";
 	
-	options.host = options.host || "";
-	
-	this.setHost(options.host);
+	this.setHost(host);
 	this.setScript(options.script);
-	
-	this.m_servVars = options.servVars || {};
-	
+	this.m_servVars = options.servVars;
+		
 	var con_opts = {
-		"host":options.host
+		"host":host
 	};
 	var con;
 	if (this.m_servVars.token && this.m_servVars.token.length){
@@ -93,6 +93,9 @@ App.prototype.m_templates;
 App.prototype.m_templateParams;
 
 App.prototype.m_paginationClass;
+
+App.prototype.m_enums;
+App.prototype.m_predefinedItems;
 
 /* protected*/
 
@@ -248,6 +251,57 @@ App.prototype.getPaginationClass = function(id){
 }
 App.prototype.setPaginationClass = function(v){
 	this.m_paginationClass = v;
+}
+
+App.prototype.getDataTypes = function(){
+	return this.m_dataTypes;
+}
+App.prototype.setDataTypes = function(v){
+	this.m_dataTypes = v;
+}
+
+App.prototype.getDataType = function(id){
+	return this.m_dataTypes[id];
+}
+
+App.prototype.setEnums = function(v){
+	this.m_enums = v;
+}
+
+App.prototype.getEnums = function(){
+	return this.m_enums;
+}
+
+App.prototype.getEnum = function(enumId,valId){
+	if (!this.m_enums[enumId])throw Error("Enum not found "+enumId)
+	return this.m_enums[enumId][this.getLocale()+"_"+valId];
+}
+
+App.prototype.setPredefinedItems = function(v){
+	this.m_predefinedItems = v;
+}
+
+App.prototype.getPredefinedItems = function(){
+	return this.m_predefinedItems;
+}
+
+App.prototype.getPredefinedItem = function(dataType,item){
+	return this.m_predefinedItems[dataType][item];
+}
+
+/**
+ * returns offset as +03:00
+ */
+App.prototype.getTimeZoneOffsetStr = function(){
+	if (!this.m_timeZoneOffsetStr){
+		var h_offset = -(new Date()).getTimezoneOffset() / 60;		
+		var h_offset_h = Math.floor(h_offset);
+		function to_str(a){
+			return ((a.toString().length==1)? "0":"")+a.toString();
+		}
+		this.m_timeZoneOffsetStr = ((h_offset_h<0)? "-":"+") + to_str(Math.abs(h_offset_h)) +":"+ to_str(Math.abs((h_offset - h_offset_h)*60));
+	}
+	return this.m_timeZoneOffsetStr;
 }
 
 App.prototype.showMenuItem = function(c,f,t,extra){

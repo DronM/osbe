@@ -30,10 +30,13 @@ EditHTML.prototype.toDOM = function(parent){
 	ClassicEditor.create( this.getNode() )
 	.then( editor => {
 		self.m_editor = editor;
+		//editor.config.resize_enabled = true;
+		//editor.ckeditorGet().config.height = 200;		
 	    } )
 	    .catch( error => {
 		console.error( error );
 	} );
+	
 }
 
 EditHTML.prototype.setValue = function(val){
@@ -57,4 +60,11 @@ EditHTML.prototype.delDOM = function(){
 	if (this.m_editor)this.m_editor.destroy();
 	
 	EditHTML.superclass.delDOM.call(this);
+}
+
+EditHTML.prototype.setEnabled = function(v){
+	EditHTML.superclass.setEnabled.call(this,v);
+	if (this.m_editor){
+		//this.m_editor.setReadOnly(!v);
+	}
 }

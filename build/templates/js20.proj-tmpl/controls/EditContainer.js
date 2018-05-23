@@ -7,6 +7,9 @@
  * @requires core/extend.js
  * @requires core/ControlContainer.js
  * @requires core/CommonHelper.js    
+ * @requires controls/ButtonOpen.js  
+ * @requires controls/ButtonSelect.js    
+ * @requires controls/ButtonClear.js   
   
  * @param {string} id
  * @param {namespace} options
@@ -15,7 +18,11 @@
  * @param {array} options.elements - Array of object{string||bool value, string descr, bool checked}
  * @param {bool} [options.addNotSelected=true]
  * @param {bool} [options.notSelectedLast=false]
- * @param {Array} options.options
+ * @param {array} options.options
+ * @param {Button} options.buttonOpen
+ * @param {Button} options.buttonSelect
+ * @param {Button} options.buttonClear
+ 
  */
 function EditContainer(id,options){
 	options = options || {};
@@ -34,7 +41,33 @@ function EditContainer(id,options){
 		n.id = n.id + ":cont";
 	}		
 	
-	options.className = options.className || this.DEF_CLASS;
+	if (options.inline===true){
+		options.contClassName = "";
+		options.editContClassName = "";
+		options.className = "";
+		options.btnContClassName = "";
+		options.contTagName = "SPAN";
+		options.editContTagName = "SPAN";	
+	}
+	
+	options.className = (options.className!==undefined)? options.className:this.DEF_CLASS;	
+	
+	//buttons
+	this.setButtonOpen(options.buttonOpen);
+	this.setButtonSelect(options.buttonSelect);
+	this.setButtonClear(options.buttonClear);		
+	this.setBtnContClassName((options.btnContClassName!=undefined)? options.btnContClassName:this.BTNS_CONTAINER_CLASS);		
+	/*
+	 * if there is any option starting with button~
+	 */
+	var btn_opt = "button";
+	for (opt in options){
+		if (opt.substring(0,btn_opt.length)==btn_opt && opt.length>btn_opt.length){
+			this.addButtonContainer();
+			break;
+		}
+	}
+	
 	
 	options.elements = options.elements || [];
 	
@@ -43,8 +76,14 @@ function EditContainer(id,options){
 	this.setOptionClass(options.optionClass);
 	
 	this.setOnSelect(options.onSelect);
-	
+		
 	this.m_initValue = options.value;	
+	//console.log("EditContainer")
+	//console.dir(this.m_initValue)
+	if (this.m_initValue && this.m_initValue.getKeys && !this.m_initValue.isNull()){
+		options.attrs = options.attrs || {};
+		options.attrs.keys = CommonHelper.serialize(this.m_initValue.getKeys());
+	}
 	options.value = undefined;
 		
 	var opt_selected = false;
@@ -99,27 +138,9 @@ function EditContainer(id,options){
 			}
 		));
 	}
-	this.m_buttons = new ControlContainer(id+":btn-cont",
-		"div",{"className":this.BTNS_CONTAINER_CLASS,
-			"visible":this.getVisible(),
-			"enabled":this.getEnabled(),
-			"readOnly":this.getVisible()
-			}
-		);
 	
-	if (options.buttonOpen){
-		this.m_buttons.addElement(options.buttonOpen);
-	}
-	if (options.buttonSelect){
-		this.m_buttons.addElement(options.buttonSelect);
-	}
-	if (options.buttonClear){
-		this.m_buttons.addElement(options.buttonClear);
-	}
-	
-	this.m_contClassName = options.contClassName||this.DEF_CONT_CLASS;
-	
-	this.m_editContClassName = options.editContClassName || (this.DEF_EDIT_CONT_CLASS +" "+ window.getBsCol("8"));
+	this.setContClassName( (options.contClassName!==undefined)? options.contClassName:this.DEF_CONT_CLASS );	
+	this.setEditContClassName( (options.editContClassName!==undefined)? options.editContClassName : (this.DEF_EDIT_CONT_CLASS +" "+ window.getBsCol(8)) );
 	
 	this.setErrorControl(options.errorControl || new ErrorControl(id+":error") );
 }
@@ -138,13 +159,10 @@ EditContainer.prototype.m_formatFunction;
 
 EditContainer.prototype.m_initValue;
 
-EditContainer.prototype.getErrorControl = function(){
-	return this.m_errorControl;
-}
-EditContainer.prototype.setErrorControl = function(v){
-	this.m_errorControl = v;
-}
-
+EditContainer.prototype.m_buttonOpen;
+EditContainer.prototype.m_buttonSelect;
+EditContainer.prototype.m_buttonClear;
+EditContainer.prototype.m_btnContClassName;
 
 /* constants */
 EditContainer.prototype.DEF_CLASS = "form-control";
@@ -154,6 +172,23 @@ EditContainer.prototype.INCORRECT_VAL_CLASS="error";
 EditContainer.prototype.DEF_EDIT_CONT_CLASS = "input-group";
 EditContainer.prototype.VAL_INIT_ATTR = "initValue";
 EditContainer.prototype.NOT_SELECTED_VAL = "null";
+EditContainer.prototype.BTNS_CONTAINER_CLASS="input-group-btn";//input-group-btn
+
+EditContainer.prototype.addButtonContainer = function(){
+	this.m_buttons = new ControlContainer(this.getId()+":btn-cont","SPAN",
+		{"className":this.m_btnContClassName,
+			"enabled":this.getEnabled()
+		}
+	);	
+	this.addButtonControls();
+}
+
+/*derived classes can change contol order*/
+EditContainer.prototype.addButtonControls = function(){
+	if (this.m_buttonOpen) this.m_buttons.addElement(this.m_buttonOpen);
+	if (this.m_buttonSelect) this.m_buttons.addElement(this.m_buttonSelect);
+	if (this.m_buttonClear) this.m_buttons.addElement(this.m_buttonClear);
+}
 
 EditContainer.prototype.addOption = function(opt){
 	this.addElement(opt);
@@ -233,7 +268,10 @@ EditContainer.prototype.setValid = function(){
 }
 
 EditContainer.prototype.toDOM = function(parent){	
-	this.m_container = new ControlContainer(this.getId()+":cont","div",{
+
+	var id = this.getId();	
+
+	this.m_container = new ControlContainer(( id? id+":cont" : null),this.m_contTagName,{
 		"className":this.m_contClassName,
 		"visible":this.getVisible()
 		});	
@@ -242,7 +280,7 @@ EditContainer.prototype.toDOM = function(parent){
 		this.m_container.addElement(this.m_label);
 	}
 
-	this.m_editContainer = new Control(this.getId()+":edit-cont","div",{
+	this.m_editContainer = new Control(( id? id+":edit-cont" : null),this.m_editContTagName,{
 			"className":this.m_editContClassName
 			});	
 	this.m_container.addElement(this.m_editContainer);
@@ -251,13 +289,14 @@ EditContainer.prototype.toDOM = function(parent){
 	EditContainer.superclass.toDOM.call(this,this.m_editContainer.getNode());
 	
 	//error
-	this.m_errorControl = new ErrorControl(this.getId()+":error");
+	this.m_errorControl = new ErrorControl( id? id+":error" : null);
 	this.m_errorControl.toDOM(this.m_editContainer.getNode());
 	
 	if (this.m_buttons && !this.m_buttons.isEmpty()){
 		this.m_buttons.toDOMAfter(this.getNode());
 	}
 }
+
 EditContainer.prototype.delDOM = function(){
 	EditContainer.superclass.delDOM.call(this);
 	
@@ -301,7 +340,11 @@ EditContainer.prototype.setEnabled = function(enabled){
 }
 
 EditContainer.prototype.reset = function(){
-	this.setIndex(0);
+	var i = 0;
+	if (this.getNotSelectedLast()){
+		i = this.getCount()-1;
+	}
+	this.setIndex(i);
 }
 
 EditContainer.prototype.isNull = function(){
@@ -352,7 +395,7 @@ EditContainer.prototype.setFormatFunction = function(v){
 	this.m_formatFunction = v;
 }
 EditContainer.prototype.getContTagName = function(){
-	return this.m_formatFunction;
+	return this.m_contTagName;
 }
 EditContainer.prototype.setContTagName = function(v){
 	this.m_contTagName = v;
@@ -387,5 +430,53 @@ EditContainer.prototype.setInputEnabled = function(v){
 stub
 */
 EditContainer.prototype.valueChanged = function(){
+}
+
+EditContainer.prototype.setButtonOpen = function(v){
+	this.m_buttonOpen = v;
+	if (this.m_buttonOpen && this.m_buttonOpen.setEditControl){
+		this.m_buttonOpen.setEditControl(this);
+	}
+}
+EditContainer.prototype.getButtonOpen = function(){
+	return this.m_buttonOpen;
+}
+
+EditContainer.prototype.setButtonClear = function(v){
+	this.m_buttonClear = v;
+	if (this.m_buttonClear && this.m_buttonClear.setEditControl){
+		this.m_buttonClear.setEditControl(this);
+	}	
+}
+EditContainer.prototype.getButtonClear = function(){
+	return this.m_buttonClear;
+}
+
+EditContainer.prototype.setButtonSelect = function(v){
+	this.m_buttonSelect = v;
+	if (this.m_buttonSelect && this.m_buttonSelect.setEditControl){
+		this.m_buttonSelect.setEditControl(this);
+	}		
+}
+EditContainer.prototype.getButtonSelect = function(){
+	return this.m_buttonSelect;
+}
+
+EditContainer.prototype.getButtons = function(){
+	return this.m_buttons;
+}
+
+EditContainer.prototype.getErrorControl = function(){
+	return this.m_errorControl;
+}
+EditContainer.prototype.setErrorControl = function(v){
+	this.m_errorControl = v;
+}
+
+EditContainer.prototype.setBtnContClassName = function(v){
+	this.m_btnContClassName = v;
+}
+EditContainer.prototype.getBtnContClassName = function(){
+	return this.m_btnContClassName;
 }
 

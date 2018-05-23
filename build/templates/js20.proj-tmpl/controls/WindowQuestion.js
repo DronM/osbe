@@ -13,7 +13,7 @@ var WindowQuestion = {
 	
 	/*
 	@param object options{
-		@param bool yes Default true
+		@param {bool} yes Default true
 		@param bool no Default true
 		@param bool cancel Default true
 		@param int timeout Default 0

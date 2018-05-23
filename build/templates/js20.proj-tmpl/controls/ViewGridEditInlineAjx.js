@@ -248,7 +248,6 @@ ViewGridEditInlineAjx.prototype.setReadBinds = function(pm){
 					"model":model,
 					"control":this.getElement(column.getId())
 				}));
-				//console.log("ViewGridEditInlineAjx.prototype.setReadBinds ctrl_name="+ctrl_name);
 			}
 		}
 		this.setDataBindings(bindings);	
@@ -324,6 +323,6 @@ ViewGridEditInlineAjx.prototype.addElement = function(ctrl,defOptions){
 	if ((!defOptions || !defOptions.editContClassName) && ctrl.setEditContClassName){
 		ctrl.setEditContClassName(ctrl.DEF_EDIT_CONT_CLASS+" "+window.getBsCol(12));
 	}
-
+//console.log("CtrlId="+ctrl.getId()+" ContTagName="+ctrl.getContTagName())
 	ViewGridEditInlineAjx.superclass.addElement.call(this,ctrl);
 }

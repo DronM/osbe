@@ -83,10 +83,13 @@ EditModalDialog.prototype.setValue = function(v){
 	}
 	else{
 		this.m_valueJSON = CommonHelper.unserialize(v);
+		//console.log("EditModalDialog.prototype.setValue v="+v)
+		//console.dir(this.m_valueJSON)
+		
 	}
 	
 	var v = this.m_formatValue(this.m_valueJSON);
-	this.getNode().textContent = v
+	this.getNode().textContent = v;
 }
 
 EditModalDialog.prototype.getValue = function(){

@@ -7,12 +7,14 @@ class Model {
 	const DATA_NODE_NAME = 'model';
 	const ROW_NODE_NAME = 'row';
 	
+	const DEF_NAMESPACE = 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"';
+	
 	private $id;	
 	
 	protected $fields;
 	protected $fieldAlias;
 	
-	private $rows;	
+	protected $rows;	
 	private $rowPos;
 	
 	private $readOnly=FALSE;
@@ -26,6 +28,7 @@ class Model {
 	private $browseMode;
 	
 	private $sysModel;
+	private $nameSpace;
 	
 	public function __construct($options=NULL){
 		$this->rows=array();
@@ -91,9 +94,10 @@ class Model {
 		return (is_array($this->fieldAlias) && array_key_exists($alias,$this->fieldAlias));
 	}
 	
-    public function __set($property, $value){
+	public function __set($property, $value){
 		$this->getFieldById($property)->setValue($value);
-    }	
+	}	
+	
 	public function __get($property) {		
 		return $this->getFieldById($property)->getValue();
 	}
@@ -156,6 +160,13 @@ class Model {
 	}
 	public function setTotalCount($totalCount){
 		$this->totalCount = $totalCount;
+	}
+
+	public function getNameSpace(){
+		return !is_null($this->nameSpace)? $this->nameSpace : self::DEF_NAMESPACE;
+	}
+	public function setNameSpace($nameSpace){
+		$this->nameSpace = $nameSpace;
 	}
 	
 	/*
@@ -222,12 +233,13 @@ class Model {
 			throw new Exception(Model::ER_OUT_OF_ROW_BOUNDS);
 		}
 	}
-    public function setRowBOF(){
+	
+	public function setRowBOF(){
 		$this->setRowPos(-1);
-    }
-    public function setLastRow(){
+	}
+	public function setLastRow(){
 		$this->setRowPos($this->getRowCount()-1);
-    }
+	}
 	
 	/*
 	*/
@@ -266,8 +278,9 @@ class Model {
 			$result.= $data;
 			$result.= '</'.Model::ROW_NODE_NAME.'>';
 			*/
-			$result.= sprintf('<%s>%s</%s>',
+			$result.= sprintf('<%s %s>%s</%s>',
 				Model::ROW_NODE_NAME,
+				$this->getNameSpace(),
 				$data,
 				Model::ROW_NODE_NAME);
 		}

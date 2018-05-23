@@ -20,12 +20,25 @@ function EditSelect(id,options){
 	
 	if (options.onSelect){
 		options.events = options.events || {};
+		var self = this;
 		if (!options.events.change){
 			options.events.change = function(){
 				self.callOnSelect();
 			}
 		}
+		else{
+			this.m_origOnChange = options.events.change;
+			options.events.change = function(){
+				self.callOnSelect();
+				self.m_origOnChange();
+			}			
+		}
 	}
+	
+	//if (typeof options.value == "object" && options.value.getKeys){
+		//this.setInitKeys(options.value.getKeys());
+	//}	
+	
 	
 	EditSelect.superclass.constructor.call(this, id, options);
 		
@@ -101,7 +114,7 @@ EditSelect.prototype.getValue = function(){
 	if (this.getIndex()>=0){
 		var v;
 		var el = this.getElement(this.getIndex());
-		if (this.getElement(this.getIndex())){
+		if (el){
 			v = el.getValue();
 		}
 		else{

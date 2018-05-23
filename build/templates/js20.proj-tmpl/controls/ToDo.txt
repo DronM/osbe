@@ -50,3 +50,13 @@ X 	Ошибка после добавления!!!
 Изменение ключей, возврат на тек. строку
 
 Позиционирование на новую строку после добавления
+
+1) Predefined elements server/client
+2) Global server/client object RefType Now: server function only
+3)enums auto gen, dataTypes 
+4) Metadata.dtd field.retAfterInsert
+5) Js object RefType, like being inside a DialogView
+6) При редактировании даты из календаря, при отмене меняет время на 00, надо всегда время оставлять текущим
+7) Field.SQLDefaultValue Чтобы значение по-умолчанию можно было выставить на сервере и при этом в insert запросе не уходил null, а просто поле пропускалось
+
+Control.toDOMBefore full support

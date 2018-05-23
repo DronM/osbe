@@ -20,7 +20,7 @@ function GridCmdContainerDOC(id,options){
 	//Unprocess
 	if (options.cmdDOCUnprocess){
 		this.setCmdDOCUnprocess( (typeof(options.cmdDOCUnprocess)=="object")?
-			options.cmdDOCUnprocess : new GridCmdDOCUnprocess(id+":unprocess",{"app":options.app})
+			options.cmdDOCUnprocess : new GridCmdDOCUnprocess(id+":unprocess")
 		);	
 	}
 

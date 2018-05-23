@@ -126,8 +126,9 @@ function replaceHTML(obj,text,winDocum){
  *@param {PublicMethod} options.publicMethod
  *@param {Model} options.model
  *@param {Edit} options.control
- *@param {Array} options.keyFields
- *@param {Array} options.descrFields
+ *@param {array} options.keyFields
+ *@param {array} options.descrFields
+ *@param {function} options.descrFunction
  *@param {int} [options.icase=DEF_IC]
  *@param {int} [options.icase=DEF_MID] 
  */
@@ -142,6 +143,7 @@ function actbAJX(options){
 	this.setControl(options.control);
 	this.setKeyFields(options.keyFields);
 	this.setDescrFields(options.descrFields);
+	this.setDescrFunction(options.descrFunction);
 	this.setIc(options.icase || this.DEF_IC);
 	this.setMid(options.mid || this.DEF_MID);		
 }
@@ -162,9 +164,11 @@ actbAJX.prototype.m_control;
 
 actbAJX.prototype.m_keyFields;
 actbAJX.prototype.m_descrFields;
+actbAJX.prototype.m_descrFunction;
 
 
 actbAJX.prototype.fillArrayOnPattern = function(inputNode){
+//console.log("actbAJX.prototype.fillArrayOnPattern")
 	var currValue = inputNode.value;
 	//clear ids
 	if (this.m_control.resetKeys){
@@ -217,12 +221,24 @@ actbAJX.prototype.onGetData = function(resp){
 	}
 	while (this.m_model.getNextRow()){
 		var res_val = "";
-		for (var fid in this.m_descrFields){
-			res_val+= (res_val)? " ":"";
-			res_val+= this.m_descrFields[fid].getValue();					
-			//@ToDo Sufisticated join mechanism
+		if (this.m_descrFunction){
+			res_val = this.m_descrFunction.call(this,this.m_model.getFields());
 		}
-		
+		else{
+			for (var fid in this.m_descrFields){
+				res_val+= (res_val)? " ":"";
+				var f_val = this.m_descrFields[fid].getValue();
+				if (typeof f_val =="object" && f_val.getDescr){
+					res_val+= f_val.getDescr();
+				}
+				else{
+					res_val+= f_val;
+				}
+				
+				//@ToDo Sufisticated join mechanism
+			}		
+		}
+				
 		var keys = {};
 		for (var fn=0;fn<this.m_keyFields.length;fn++){
 			if (ctrl_key_ids)		
@@ -365,6 +381,13 @@ actbAJX.prototype.setDescrFields = function(v){
 actbAJX.prototype.getDescrFields = function(){
 	return this.m_descrFields;
 }
+actbAJX.prototype.setDescrFunction = function(v){
+	this.m_descrFunction = v;
+}
+
+actbAJX.prototype.getDescrFunction = function(){
+	return this.m_descrFunction;
+}
 
 actbAJX.prototype.setKeyFields = function(v){
 	this.m_keyFields = v;
@@ -448,7 +471,11 @@ function actb(obj,winObj,servConnect){
 				EventHelper.add(winDocum,"keydown",actb_checkkey,false);
 				//EventHelper.add(actb_curr,"blur",actb_clear,false);
 				EventHelper.add(winDocum,"keypress",actb_keypress,false);
-				DOMHelper.delClass(actb_curr,"null-ref");
+				if (DOMHelper.hasClass(actb_curr,"null-ref")){
+					DOMHelper.delClass(actb_curr,"null-ref");
+					//actb_tocomplete();
+					actb_generate();
+				}				
 			},
 			false
 		);

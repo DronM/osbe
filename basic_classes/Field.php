@@ -130,8 +130,10 @@ class Field {
 	}
 	public function dataToXML(){
 		$id = $this->getId();
-		return sprintf('<%s>%s</%s>',
-			$id,$this->getValue(),$id);
+		$val = $this->getValue();
+		return (is_null($val)?
+				sprintf('<%s xsi:nil="true">%s</%s>',$id,$val,$id) : sprintf('<%s>%s</%s>',$id,$val,$id)
+		);
 	}
 	public function metadataToXML(){
 		return sprintf('<field id="%s" alias="%s" dataType="%s" sysCol="%s"/>',

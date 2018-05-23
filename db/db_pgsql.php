@@ -61,7 +61,7 @@ class DB_Sql {
 	function select_db($database="") {
 	}
 
-	function query($query_string) {
+	function query($query_string,$query_params=NULL) {
 		if ($this->showqueries) {
 			echo "Query: $query_string\n";
 
@@ -73,7 +73,12 @@ class DB_Sql {
 			echo "Time before: $beforetime\n";
 		}
 
-		$this->query_id = @pg_query($this->link_id,$query_string);
+		if (is_null($query_params)){
+			$this->query_id = @pg_query($this->link_id,$query_string);
+		}
+		else{
+			$this->query_id = @pg_query_params($this->link_id,$query_string,$query_params);
+		}
 		if (!$this->query_id){
 	      		$this->halt("Invalid SQL: ".$query_string);
 	    	}
@@ -180,9 +185,9 @@ class DB_Sql {
 		pg_free_result($this->query_id);
 	}
 
-	function query_first($query_string) {
+	function query_first($query_string,$query_params=NULL) {
 		// does a query and returns first row
-		$query_id = $this->query($query_string);
+		$query_id = $this->query($query_string,$query_params);
 		$returnarray = $this->fetch_array($query_id, $query_string);
 		$this->free_result($query_id);
 		return $returnarray;

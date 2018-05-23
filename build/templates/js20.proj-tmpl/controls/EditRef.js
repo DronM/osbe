@@ -15,7 +15,14 @@
  
  * @param string id 
  * @param {Object} options
- * @param {bool} [options.cmdAutoComplete=true] 
+ * @param {bool} [options.cmdAutoComplete=true]
+ 
+ * @param {WindowFormObject} options.selectWinClass
+ * @param {string} options.selectWinParams
+ * @param {array} options.selectDescrIds
+ * @param {array} options.selectKeyIds
+ * @param {function} options.selectFormatFunction
+ * @param {bool} [options.selectMultySelect=false]
  */
 function EditRef(id,options){
 	options = options || {};
@@ -37,8 +44,7 @@ function EditRef(id,options){
 	if (options.cmdInsert){
 		options.buttonInsert = options.buttonInsert ||
 			new ButtonInsert(id+":btn_insert",{
-				"editControl":this,
-				"app":options.app
+				"editControl":this
 			});
 	}
 
@@ -48,13 +54,11 @@ function EditRef(id,options){
 			{"winClass":options.selectWinClass,
 			"winParams":options.selectWinParams,
 			"descrIds":options.selectDescrIds,
-			//"descrFunction":options.selectDescrFunction,
 			"keyIds":options.selectKeyIds,
 			"control":this,
 			"onSelect":options.onSelect,
 			"formatFunction":options.selectFormatFunction,
-			"multySelect":options.selectMultySelect,
-			"app":options.app
+			"multySelect":options.selectMultySelect
 			});
 	}
 	
@@ -63,15 +67,13 @@ function EditRef(id,options){
 			{"winClass":options.editWinClass,
 			"winParams":options.editWinParams,
 			"keyIds":options.openKeyIds,
-			"control":this,
-			"app":options.app
+			"control":this
 			});			
 	}
 	
 	if (options.cmdClear){
 		options.buttonClear = options.buttonClear || new ButtonClear(id+":btn_clear",{
-				"editControl":this,
-				"app":options.app
+				"editControl":this
 			});
 	}
 		
@@ -164,7 +166,9 @@ EditRef.prototype.getIsRef = function(){
 }
 
 EditRef.prototype.getModified = function(){
-	return (this.getAttr(this.KEY_ATTR) != this.getAttr(this.KEY_INIT_ATTR));
+	var key = this.getAttr(this.KEY_ATTR);
+	//if no key it is not modified
+	return (key && key!="{}" && (key!=this.getAttr(this.KEY_INIT_ATTR)) );
 }
 
 EditRef.prototype.isNull = function(){
@@ -182,19 +186,19 @@ EditRef.prototype.reset = function(){
 
 EditRef.prototype.setValue = function(val){
 	var descr;	
-	if (typeof val == "object" && val.getKeys && val.getDescr){
+	if (val && typeof val == "object" && val.getKeys && val.getDescr){
 		this.setKeys(val.getKeys());
 		descr = val.getDescr(); 
 	}
-	else if (typeof val == "object" && val.keys && val.descr){
+	else if (val && typeof val == "object" && val.keys && val.descr){
 		this.setKeys(val.keys);
 		descr = val.descr; 
 	}
-	else if (typeof val == "object" && val.m_keys && val.m_descr){
+	else if (val && typeof val == "object" && val.m_keys && val.m_descr){
 		this.setKeys(val.m_keys);
 		descr = val.m_descr; 
 	}			
-	else if (typeof val != "object"){
+	else if (val && typeof val != "object"){
 		descr = val;
 	}
 	else{
@@ -205,13 +209,11 @@ EditRef.prototype.setValue = function(val){
 
 EditRef.prototype.getValue = function(){
 	var descr = EditRef.superclass.getValue.call(this);
-
-	//@ToDo null value if no keys
-	return new RefType(
-		{"keys":this.getKeys(),
-		"descr":descr
-		}
+	var res = (
+		new RefType({"keys":this.getKeys(),"descr":descr,"dataType":undefined})
 	);
+//console.dir(res)
+	return res;
 }
 
 EditRef.prototype.getKeyValue = function(key){
@@ -220,7 +222,7 @@ EditRef.prototype.getKeyValue = function(key){
 
 EditRef.prototype.setInitValue = function(val){
 	this.setValue(val);
-	if (typeof val == "object"){
+	if (typeof val == "object" && val.getKeys){
 		this.setInitKeys(val.getKeys());
 	}	
 	

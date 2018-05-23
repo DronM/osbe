@@ -1,1 +1,1 @@
-ButtonInsert.prototype.DEF_HINT = "добавить";
+ButtonInsert.prototype.DEF_TITLE = "добавить";

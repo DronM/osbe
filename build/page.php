@@ -29,11 +29,12 @@
 	define('SBMT_ZIP_DB','zip_db');
 	define('SBMT_TAR_ZIPS','tar_zips');
 	define('SBMT_CLONE','clone');
-	
+	$js_vers = substr(USER_JS_PATH,0,strlen(USER_JS_PATH)-1);
+	echo 'JSVersion='.$js_vers.'</br>';
 	$proj_man = new ProjectManager(
 		substr(ABSOLUTE_PATH,0,strlen(ABSOLUTE_PATH)-1),
 		REPO_DIR,
-		substr(USER_JS_PATH,0,strlen(USER_JS_PATH)-1),
+		$js_vers,
 		array(
 			'buildGroup' => BUILD_GROUP,
 			'buildFilePermission' => BUILD_FILE_PERMISSION,
@@ -88,8 +89,8 @@
 		//$proj_man->buildJSDoc($log);
 		$proj_man->closeVersion($log);			
 		$proj_man->prepareSQLForUpdate($log);
-		//$proj_man->commit($_REQUEST['version_commit_descr'],$log);			
-		//$proj_man->push($log);			
+		$proj_man->commit($_REQUEST['version_commit_descr'],$log);			
+		$proj_man->push($log);			
 		print_log($log);
 		$log->dump();
 		

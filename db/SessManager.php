@@ -12,7 +12,7 @@ class SessManager{
 		// This line prevents unexpected effects when using objects as save handlers.
 		register_shutdown_function('session_write_close');
 	}
-	function start_session($session_name, $dbLinkMaster, $dbLink,$secure=FALSE) {
+	function start_session($session_name, $dbLinkMaster, $dbLink,$secure=FALSE,$expSec=0) {
 		$this->dbLinkMaster = $dbLinkMaster;
 		$this->dbLink = $dbLink;
 		// Make sure the session cookie is not accessable via javascript.

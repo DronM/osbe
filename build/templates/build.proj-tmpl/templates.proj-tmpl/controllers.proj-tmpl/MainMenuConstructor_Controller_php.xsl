@@ -52,7 +52,7 @@ class <xsl:value-of select="@id"/>_Controller extends <xsl:value-of select="@par
 		
 		//!!!XMLNS!!!
 		$content = str_replace('xmlns="http://www.w3.org/1999/xhtml"','',$content);
-		
+		$content = str_replace('xmlns="http://www.katren.org/crm/doc/mainmenu"','',$content);		
 		$xml = simplexml_load_string($content);
 		//throw new Exception("XML=".html_entity_decode($content));
 		$items = $xml->xpath('//menuitem[@viewid]');
@@ -74,27 +74,28 @@ class <xsl:value-of select="@id"/>_Controller extends <xsl:value-of select="@par
 		//throw new Exception("SELECT ".$sql);
 		$ar = $this->getDbLink()->query_first("SELECT ".$sql);
 		foreach($ar as $f=>$v){
-			list($view_t, $view_id) = split('_',$f);
+			list($view_t, $view_id) = explode('_',$f);
 			$content = str_replace(sprintf('viewid="%s"',$view_id),$v,$content);
 			$content = str_replace(sprintf('viewid ="%s"',$view_id),$v,$content);
 			$content = str_replace(sprintf('viewid= "%s"',$view_id),$v,$content);
 			$content = str_replace(sprintf('viewid = "%s"',$view_id),$v,$content);
 		}
 		//throw new Exception(USER_MODELS_PATH.'MainMenu_Model_'.$role_id. ( (isset($user_id))? '_'.$user_id:'' ). '.php');
-				
+		
+		$postf = ( (isset($role_id))? '_'.$role_id:'' ).( (isset($user_id))? '_'.$user_id:'' ); 		
 		file_put_contents(
-			USER_MODELS_PATH.'MainMenu_Model_'.$role_id. ( (isset($user_id))? '_'.$user_id:'' ). '.php',
+			USER_MODELS_PATH.'MainMenu_Model'. $postf. '.php',
 			sprintf('<![CDATA[<?php]]>
 require_once(FRAME_WORK_PATH.\'basic_classes/Model.php\');
 
-class MainMenu_Model_%s extends Model{
+class MainMenu_Model%s extends Model{
 	public function dataToXML(){
 		return \'<![CDATA[<model id="MainMenu_Model" sysModel="1">]]>
 		%s
 		<![CDATA[</model>]]>\';
 	}
 }
-<![CDATA[?>]]>',$role_id,$content));
+<![CDATA[?>]]>',$postf,$content));
 	}
 
 	public function insert($pm){		
@@ -104,6 +105,21 @@ class MainMenu_Model_%s extends Model{
 	public function update($pm){
 		$this->gen_menu($pm);
 		parent::update($pm);	
+	}
+
+	public function delete($pm){
+		$ar = $this->getDbLink()->query_first(sprintf(
+			"SELECT user_id,role_id FROM main_menus
+			WHERE id=%s",
+		$this->getExtDbVal($pm,"id")
+		));
+		
+		$postf = ( (isset($ar['role_id']))? '_'.$ar['role_id']:'' ).( (isset($ar['user_id']))? '_'.$ar['user_id']:'' ); 		
+		$fl = USER_MODELS_PATH.'MainMenu_Model'. $postf. '.php';
+		if (file_exists($fl)){
+			unlink($fl);
+		}
+		parent::delete($pm);
 	}
 	
 </xsl:template>

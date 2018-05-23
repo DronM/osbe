@@ -41,7 +41,7 @@ function MainMenuTree(id,options){
 		"elements":[
 			new GridRow(id+":content-tree:head:row0",{
 				"elements":[
-					new GridCellHead(id+":content-tree:head:descr",{
+					new GridCellHead(id+":content-tree:head",{
 						"className":window.getBsCol(6),
 						"columns":[
 							new GridColumn({
@@ -82,7 +82,13 @@ function MainMenuTree(id,options){
 									"labelCaption":this.LB_CAP_GLYPHCLASS,
 									"contTagName":"DIV",
 									"labelClassName":"control-label "+window.getBsCol(2),
-									"editContClassName":"input-group "+window.getBsCol(10)
+									"editContClassName":"input-group "+window.getBsCol(10),
+									"buttonSelect":new ButtonCtrl(id+":content-tree:head:glyphclass-sel",{
+										"glyph":"glyphicon-menu-hamburger",
+										"onClick":function(e){
+											self.selectPict(this.getEditControl());
+										}
+									})
 								}
 							}),
 							
@@ -145,3 +151,48 @@ row.m_drop.accept = function(dragObject) {
 	
 }			
 */
+
+MainMenuTree.prototype.selectPict = function(editCtrl){
+	var self = this;
+	this.m_view = new View(this.getId()+":view:body:view",{
+		"template":window.getApp().getTemplate("IcomoonList"),
+		"events":{
+			"click":function(e){
+				if (e.target.tagName.toUpperCase()=="DIV"){
+					editCtrl.setValue(e.target.firstChild.className);
+					self.closeSelect();
+				}
+			}
+		}
+	});	
+	this.m_form = new WindowFormModalBS(this.getId()+":form",{
+		"cmdCancel":true,
+		"controlCancelCaption":this.BTN_CANCEL_CAP,
+		"controlCancelTitle":this.BTN_CANCEL_TITLE,
+		"cmdOk":false,
+		"controlOkCaption":null,
+		"controlOkTitle":null,
+		"onClickCancel":function(){
+			self.closeSelect();
+		},		
+		"onClickOk":function(){
+			//self.setValue(self.m_view.getValue());
+			self.closeSelect();
+		},				
+		"content":this.m_view,
+		"contentHead":this.SEL_PIC_HEAD
+	});
+
+	this.m_form.open();	
+}
+MainMenuTree.prototype.closeSelect = function(){
+	if (this.m_view){
+		this.m_view.delDOM();
+		delete this.m_view;
+	}
+	if (this.m_form){
+		this.m_form.close();
+		delete this.m_form;
+	}		
+}
+

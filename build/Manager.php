@@ -55,23 +55,19 @@ class Manager {
 	
 	}
 
-	public static function deleteDir($dirPath) {
-		if (! is_dir($dirPath)) {
-			throw new InvalidArgumentException("$dirPath must be a directory");
-		}
-		if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
-			$dirPath .= '/';
-		}
-		$files = glob($dirPath . '*', GLOB_MARK);
-		foreach ($files as $file) {
-			if (is_dir($file)) {
-			    self::deleteDir($file);
+	public static function deleteDir($dir) {
+		if (is_dir($dir)) { 
+			$objects = scandir($dir); 
+			foreach ($objects as $object) { 
+				if ($object != "." && $object != "..") { 
+					if (is_dir($dir."/".$object))
+						rrmdir($dir."/".$object);
+					else
+						unlink($dir."/".$object); 
+				} 
 			}
-			else{
-			    unlink($file);
-			}
-		}
-		rmdir($dirPath);
+			rmdir($dir); 
+		} 
 	}
 
 	public function getMdFile(){

@@ -34,19 +34,19 @@ function MainMenuConstructor_View(id,options){
 	
 	//read
 	this.setReadPublicMethod(contr.getPublicMethod("get_object"));
-	this.m_model = options.models.MainMenuConstructor_Model;
+	this.m_model = options.models.MainMenuConstructorDialog_Model;
 	this.setDataBindings([
-		new DataBinding({"control":this.getElement("id"),"model":this.m_model}),
-		new DataBinding({"control":this.getElement("content"),"model":this.m_model}),
-		new DataBinding({"control":this.getElement("role"),"field":this.m_model.getField("role_id")}),
-		new DataBinding({"control":this.getElement("user"),"keyIds":["user_id"]})
+		new DataBinding({"control":this.getElement("id")}),
+		new DataBinding({"control":this.getElement("content")}),
+		new DataBinding({"control":this.getElement("role"),"fieldId":"role_id"}),
+		new DataBinding({"control":this.getElement("user"),"keyIds":["user_id"],"fieldId":"user_descr"})
 	]);
 	
 	//write
 	this.setController(contr);
 	this.getCommand(this.CMD_OK).setBindings([
 		new CommandBinding({"control":this.getElement("id")}),
-		new CommandBinding({"control":this.getElement("content")}),
+		new CommandBinding({"control":this.getElement("content"),"fieldId":"content"}),
 		new CommandBinding({"control":this.getElement("role"),"fieldId":"role_id"}),
 		new CommandBinding({"control":this.getElement("user"),"fieldId":"user_id"})
 	]);

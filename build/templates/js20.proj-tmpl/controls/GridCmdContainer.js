@@ -33,8 +33,8 @@ function GridCmdContainer(id,options){
 	
 	options.attrs = options.attrs || {};
 	options.className = options.className || options.attrs["class"] || this.DEF_CLASS_NAME;
-		
-	options.cmdInsert = (options.cmdInsert!=undefined)? options.cmdInsert:true;
+	
+	options.cmdInsert = (options.cmdInsert!=undefined)? options.cmdInsert : true;//(window.onSelect? false:true);
 	options.cmdEdit = (options.cmdEdit!=undefined)? options.cmdEdit:options.cmdInsert;
 	options.cmdCopy = (options.cmdCopy!=undefined)? options.cmdCopy:options.cmdInsert;
 	options.cmdDelete = (options.cmdDelete!=undefined)? options.cmdDelete:options.cmdInsert;
@@ -66,7 +66,7 @@ function GridCmdContainer(id,options){
 	GridCmdContainer.superclass.constructor.call(this, id, (options.tagName || this.DEF_TAG_NAME), options);
 	
 	options.variantStorage = options.variantStorage || {};
-	
+
 	/* insert */
 	if (options.cmdInsert){
 		this.setCmdInsert( (typeof(options.cmdInsert)=="object")?

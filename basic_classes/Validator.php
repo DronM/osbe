@@ -1,6 +1,6 @@
 <?php
 class Validator{
-	const ER_INVALID_VALUE = "не верное значение для типа '%s'";
+	const ER_INVALID_VALUE = "неверное значение для типа '%s'";
 	public function validate($val){
 		$val = trim($val);
 		$l = strtolower($val);

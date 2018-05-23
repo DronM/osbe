@@ -33,6 +33,10 @@ Response.prototype.setModelData = function(id,data){
 	this.m_models[id] = data;
 }
 
+/**
+ * @param {string} id model id
+ * returns {XMLDocument|JSON}
+ */
 Response.prototype.getModelData = function(id){
 	if (!this.m_models[id]){
 		throw new Error(CommonHelper.format(this.ERR_NO_MODEL,[id]));
@@ -42,4 +46,10 @@ Response.prototype.getModelData = function(id){
 
 Response.prototype.getModels = function(){
 	return this.m_models;	
+}
+
+Response.prototype.getModel = function(id){
+	if (this.modelExists(id) && window[id]){
+		return new window[id]({"data":this.m_models[id]});
+	}
 }

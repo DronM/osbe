@@ -20,7 +20,7 @@ class FieldSQLDate extends FieldSQL{
 	
     public function getValueForDb(){
 		$val = parent::getValueForDb();
-		if (strtolower($val)=='now()' || strtolower($val)=='current_timestamp'){
+		if (strtolower($val)=='now()' ||strtolower($val)=='now()::date' || strtolower($val)=='current_timestamp'){
 			return $val;
 		}		
 		return $this->formatVal($val);

@@ -125,7 +125,7 @@ class PackageManager extends Manager{
 			
 			//open metadata
 			$f_md = $this->getMdFile();
-			$dom = new DOMDocument();
+			$dom = new DOMDocument();			
 			$dom->load($f_md);
 			$xpath = new DOMXPath($dom);
 			

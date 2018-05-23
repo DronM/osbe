@@ -52,11 +52,12 @@ EditRadioGroup.prototype.getIndex = function(){
 /*
 Выбирает элемент с заданным ID, с остальных выбор снимается
 */
-EditRadioGroup.prototype.setValueById = function(id){
+
+EditRadioGroup.prototype.setValue = function(id){
 	for (var elem_id in this.m_elements){
-		if (this.m_elements[elem_id].m_node.nodeName.toLowerCase()=="input"){
-			this.m_elements[elem_id].m_node.checked = (this.m_elements[elem_id].m_node.id==id);
-		}
+		//if (this.m_elements[elem_id].m_node.nodeName.toLowerCase()=="input"){
+		this.m_elements[elem_id].getNode().checked = (this.m_elements[elem_id].getNode().value==id);
+		//}
 	}
 }
 

@@ -43,7 +43,7 @@ WindowMessage.prototype.m_model;
 WindowMessage.prototype.m_bsCol;
 	
 /*
-@param {string} text
+@param {string|object} text if object is given it is treated as Control options
 @param {int} [type=TP_MESSAGE]
 @param {int} [timeout=0]
 */
@@ -159,9 +159,11 @@ WindowMessage.prototype.toDOM = function(){
 			{"value":DateHelper.format(this.m_messages[i].date_time,"H:i:s")
 			}));				
 		
-		cont.addElement(new Control(this.m_messages[i].id+":title","DIV",
-			{"value":this.m_messages[i].content
-			}));				
+		cont.addElement(new Control(
+				this.m_messages[i].id+":title",
+				"DIV",
+				(typeof this.m_messages[i].content == "string")? {"value":this.m_messages[i].content} : this.m_messages[i].content
+			));
 		this.m_content.addElement(cont);
 		t++;			
 	}

@@ -130,7 +130,8 @@ class ControllerDb extends Controller{
 	public function modelUpdate($model){		
 		$this->methodParamsToModel(
 			$this->getPublicMethod(ControllerDb::METH_UPDATE),
-			$model);
+			$model
+		);
 		$model->update();		
 	}
 	
@@ -194,6 +195,17 @@ class ControllerDb extends Controller{
 	 *	public method realization
 	 */
 	
+	public function addInsertedIdModel($insertedIdAr){
+		$fields = array();
+		foreach($insertedIdAr as $key=>$val){
+			array_push($fields,new Field($key,DT_STRING,array('value'=>$val)));
+		}
+		$this->addModel(new ModelVars(
+			array('id'=>'InsertedId_Model',
+				'values'=>$fields)
+			)
+		);
+	}
 	/**
 	 *	Makes insert command on a model defined
 	 *	in insertModelId
@@ -213,6 +225,8 @@ class ControllerDb extends Controller{
 			$inserted_id_ar = $this->modelInsert($model,TRUE);//$need_id
 
 			//last inserted id
+			$this->addInsertedIdModel($inserted_id_ar);
+			/*
 			$fields = array();
 			foreach($inserted_id_ar as $key=>$val){
 				array_push($fields,new Field($key,DT_STRING,array('value'=>$val)));
@@ -222,7 +236,7 @@ class ControllerDb extends Controller{
 					'values'=>$fields)
 				)
 			);
-			
+			*/
 			//depricated			
 			if ($need_id){
 				//last inserted id
@@ -311,8 +325,7 @@ class ControllerDb extends Controller{
 			if (!isset($model_name)){
 				throw new Exception(self::ER_NO_INSERT_MODEL);
 			}
-			$this->modelUpdate(
-				new $model_name($this->getDbLinkMaster()));	
+			$this->modelUpdate(new $model_name($this->getDbLinkMaster()));	
 		}
 		else{
 			/**

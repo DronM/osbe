@@ -72,7 +72,7 @@ class <xsl:value-of select="@id"/>_Controller extends Controller{
 		$this->projManager = new ProjectManager(
 			$this->getProjectDir(),
 			$this->getRepoDir(),
-			$this->getJsDir();
+			$this->getJsDir(),
 			array(
 				'buildGroup' => BUILD_GROUP,
 				'buildFilePermission' => BUILD_FILE_PERMISSION,

@@ -20,7 +20,7 @@ function GridCmdRowDown(id,options){
 
 	options.glyph = "glyphicon-arrow-down";
 	options.buttonClass = ButtonCtrl;
-	options.showCmdControl = true;
+	options.showCmdControl = (options.showCmdControl!=undefined)? options.showCmdControl:false;
 	
 	GridCmdRowDown.superclass.constructor.call(this,id,options);
 		

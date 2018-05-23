@@ -57,6 +57,9 @@ var CommonHelper = {
 		return km + kw + kd;
 	},
 	byteForamt:function(size,precision){
+		return this.byteFormat(size,precision);
+	},
+	byteFormat:function(size,precision){
 		precision = (precision==undefined)? 2:precision;
 		var i = Math.floor( Math.log(size) / Math.log(1024) );
 		return ( size / Math.pow(1024, i) ).toFixed(precision) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
@@ -213,9 +216,17 @@ var CommonHelper = {
 		return (json_string)? JSON.parse(json_string,function(key,val){
 			//console.log("Key="+key+" val="+CommonHelper.var_export(val));
 			//return val;
+			/*
 			if (val && typeof val=="object" && val.RefType){
 				return new RefType(val.RefType);
 			}
+			*/
+			if (val && typeof val=="object" && "descr" in val && "keys" in val){
+			//console.log("unserialize key="+key);
+			//console.dir(val.keys)
+			
+				return new RefType(val);
+			}			
 			else{
 				return val;
 			}
@@ -261,8 +272,14 @@ var CommonHelper = {
 	    return n;
 	},
 	
+	/**
+	 * https://gist.github.com/getify/3667624
+	 */
+	escapeDoubleQuotes:function(str) {
+		return str.replace(/\\([\s\S])|(")/g,"\\$1$2"); // thanks @slevithan!
+	},
 	
-	/***
+	/**
 	 * Author: Maverick Chan
 	 * Script: longString.js
 	 **/	
@@ -274,7 +291,7 @@ var CommonHelper = {
 		    = /^function\s*[a-zA-Z0-9_$]*\s*\(\s*\)\s*{\s*\/\*([\s\S]*)\*\/\s*}\s*$/g;
 
 		var wantedString = funcString.replace(funcDefinitionRe, "$1").trim();
-		return wantedString;		
+		return wantedString;
 	},
 	
 	merge:function(o1,o2){

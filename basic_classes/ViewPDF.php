@@ -64,19 +64,26 @@ class ViewPDF extends View{
 		
 		//FOP
 		try{
-			$out_file = OUTPUT_PATH.$templ_name.".pdf";
+			$out_file = OUTPUT_PATH.uniqid().".pdf";//$templ_name
 			//throw new Exception(sprintf(PDF_CMD_TEMPLATE,$xml_file, $xslt_file, $out_file));
 			exec(sprintf(PDF_CMD_TEMPLATE,$xml_file, $xslt_file, $out_file));
 					
 			if (!file_exists($out_file)){
 				throw new Exception(ViewPDF::ER_FILE_NOT_FOUND);
 			}
-			downloadFile(
-				$out_file,
-				'application/pdf',
-				(isset($_REQUEST['inline']) && $_REQUEST['inline']=='1')? 'inline;':'attachment;',
-				$templ_name.".pdf"
-			);
+			try{
+				ob_clean();
+				downloadFile(
+					$out_file,
+					'application/pdf',
+					(isset($_REQUEST['inline']) && $_REQUEST['inline']=='1')? 'inline;':'attachment;',
+					$templ_name.".pdf"
+				);
+			}
+			finally{
+				unlink($out_file);
+			}
+			
 			return TRUE;
 		}
 		finally{

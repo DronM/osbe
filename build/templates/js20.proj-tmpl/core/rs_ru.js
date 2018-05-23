@@ -21,6 +21,7 @@ ValidatorInt.prototype.ER_VIOL_UNSIGNED = "значение меньше нул�
 //ValidatorFloat.prototype.DECIMAL_SEP = ".";
 
 Field.prototype.ER_NO_VALIDATOR = "Поле:%, не задан валидатор.";
+Field.prototype.ER_SET_VAL = "Ошибка установки значения, поле:%, %";
 
 //FieldRef.prototype.ER_NO_KEY = "ключевое поле не найдено.";
 

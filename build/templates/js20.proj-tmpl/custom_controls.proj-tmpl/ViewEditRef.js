@@ -34,7 +34,7 @@ function ViewEditRef(id,options){
 	var self = this;
 	
 	options.onSelect = function(fields){
-		self.m_menuTree.m_editViewDescr = fields.user_descr.getValue();
+		if(self.m_menuTree)self.m_menuTree.m_editViewDescr = fields.user_descr.getValue();
 	}
 		
 	ViewEditRef.superclass.constructor.call(this,id,options);

@@ -12,8 +12,8 @@
 <xsl:template match="controller"><![CDATA[<?php]]>
 <xsl:call-template name="add_requirements"/>
 class <xsl:value-of select="@id"/>_Controller extends <xsl:value-of select="@parentId"/>{
-	public function __construct($dbLinkMaster=NULL){
-		parent::__construct($dbLinkMaster);<xsl:apply-templates/>
+	public function __construct($dbLinkMaster=NULL,$dbLink=NULL){
+		parent::__construct($dbLinkMaster,$dbLink);<xsl:apply-templates/>
 	}
 }
 <![CDATA[?>]]>
@@ -205,7 +205,7 @@ class <xsl:value-of select="@id"/>_Controller extends <xsl:value-of select="@par
 <xsl:variable name="cur_model_id" select="@modelId"/>
 		/* get_object */
 		$pm = new PublicMethod('get_object');
-		$pm->addParam(new FieldExtInt('browse_mode'));
+		$pm->addParam(new FieldExtString('mode'));
 		<xsl:variable name="model_id">
 		<xsl:choose>
 		<xsl:when test="/metadata/models/model[@id=$cur_model_id and @virtual='TRUE']/@baseModelId">
@@ -230,7 +230,7 @@ class <xsl:value-of select="@id"/>_Controller extends <xsl:value-of select="@par
 <xsl:variable name="model_id" select="@modelId"/>
 		/* get_object */
 		$pm = new PublicMethod('get_object');
-		$pm->addParam(new FieldExtInt('browse_mode'));
+		$pm->addParam(new FieldExtString('mode'));
 		$pm->addParam(new FieldExtString('details'));
 		<xsl:for-each select="/metadata/models/model[@id=$model_id]/field[@primaryKey='TRUE']">
 		<xsl:variable name="enum_id" select="@enumId"/>
@@ -329,7 +329,12 @@ class <xsl:value-of select="@id"/>_Controller extends <xsl:value-of select="@par
 </xsl:template>
 
 <xsl:template name="add_requirements">
-require_once(FRAME_WORK_PATH.'basic_classes/<xsl:value-of select="@parentId"/>.php');
+<xsl:choose>
+<xsl:when test="@parentType='user'">
+require_once(USER_CONTROLLERS_PATH.'<xsl:value-of select="@parentId"/>.php');</xsl:when>
+<xsl:otherwise>
+require_once(FRAME_WORK_PATH.'basic_classes/<xsl:value-of select="@parentId"/>.php');</xsl:otherwise>
+</xsl:choose>
 <xsl:if test="/metadata/models/model/field/@dataType='Int'">
 require_once(FRAME_WORK_PATH.'basic_classes/FieldExtInt.php');</xsl:if>
 <xsl:if test="/metadata/models/model/field/@dataType='String'">

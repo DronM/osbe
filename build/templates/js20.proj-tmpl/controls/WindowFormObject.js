@@ -22,7 +22,7 @@ function WindowFormObject(options){
 		throw Error(this.ER_NO_METHOD);
 	}
 	*/
-//window.getApp() options.app	
+
 	options.host = options.host || window.getApp().getHost();
 	options.script = options.script || window.getApp().getScript();
 	options.URLParams = options.URLParams || "";
@@ -45,7 +45,8 @@ function WindowFormObject(options){
 	this.setMethod(options.method);
 	this.setTemplate(options.template);
 	this.setView(options.view);
-	this.setKeys(options.keys); 
+	this.setKeys(options.keys);
+	this.setMode((options.params && options.params.cmd)? options.params.cmd:null);  
 	
 	WindowFormObject.superclass.constructor.call(this,options);
 	
@@ -62,6 +63,7 @@ WindowFormObject.prototype.m_template;
 WindowFormObject.prototype.m_view;
 WindowFormObject.prototype.m_keys;
 WindowFormObject.prototype.m_keyIds;
+WindowFormObject.prototype.m_mode;
 
 /* protected*/
 
@@ -69,7 +71,8 @@ WindowFormObject.prototype.m_keyIds;
 WindowFormObject.prototype.getURLParams = function(){
 	var str = "c="+this.m_controller;
 	str += "&f="+this.m_method;
-	if(this.m_template) str += "&t="+this.m_template;	
+	if(this.m_template) str += "&t="+this.m_template;
+	if(this.m_mode) str += "&mode="+this.m_mode;
 	str += "&v="+this.m_view;
 	
 	for(var fid in this.m_keys){
@@ -124,4 +127,10 @@ WindowFormObject.prototype.setTemplate = function(v){
 }
 WindowFormObject.prototype.getTemplate = function(){
 	return this.m_template;
+}
+WindowFormObject.prototype.setMode = function(v){
+	this.m_mode = v
+}
+WindowFormObject.prototype.getMode = function(){
+	return this.m_mode;
 }

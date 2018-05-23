@@ -139,6 +139,10 @@
 <!ELEMENT controller (publicMethod+)>
 <!ATTLIST controller id CDATA #REQUIRED>
 <!ATTLIST controller parentId CDATA #IMPLIED>
+
+<!-- Where search for controller file: user project dir or framework, defaul framework-->
+<!ATTLIST controller parentType (user|fw) #IMPLIED>
+
 <!ATTLIST controller parentIdJS CDATA #IMPLIED>
 <!ATTLIST controller server (TRUE|FALSE) #IMPLIED>
 <!ATTLIST controller client (TRUE|FALSE) #IMPLIED>

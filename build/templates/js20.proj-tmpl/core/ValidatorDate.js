@@ -15,8 +15,15 @@ function ValidatorDate(options){
 extend(ValidatorDate,Validator);
 
 ValidatorDate.prototype.correctValue = function(v){
-	if (!v)return DateHelper.time();
-	if (v instanceof Date) return v;
-	return DateHelper.strtotime(v);
-	//return new Date(v);
+	var ret;
+	if (!v){
+		ret = DateHelper.time();
+	}
+	else if (typeof v =="object"){
+		ret = v;
+	}
+	else{
+		ret = DateHelper.strtotime(v);
+	}
+	return ret;
 }

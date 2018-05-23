@@ -67,6 +67,7 @@ Field.prototype.DT_ARRAY = 23;
 Field.prototype.DT_XML = 24;
 Field.prototype.DT_INT_BIG = 25;
 Field.prototype.DT_INT_SMALL = 26;
+Field.prototype.DT_BYTEA = 27;
 
 Field.prototype.OLD_PREF = "old_";
 
@@ -132,10 +133,13 @@ Field.prototype.getDataType = function(){
 }
 
 Field.prototype.setValue = function(v){
-	//if (v!==null){
+	try{
 		v = this.m_validator.correctValue(v);
 		this.m_validator.validate(v);
-	//}
+	}
+	catch(e){
+		throw new Error(CommonHelper.format(this.ER_SET_VAL,[this.getAlias(),e.message]));
+	}
 	this.m_value = v;
 }
 
@@ -167,7 +171,6 @@ Field.prototype.getValueXHR = function(){
 }
 
 Field.prototype.isNull = function(){
-	//return this.getValidator().isNull(this.getValue(),this.getDefValue());
 	return (
 		(this.getValue()===null)
 		&&

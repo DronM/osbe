@@ -74,7 +74,11 @@ extend(PopOver,ControlContainer);
 /* protected*/
 
 
-/* public methods */
+/**
+ * public methods
+ * @param {Event} e
+ * @param {DOMNode} fixToElement
+ */
 PopOver.prototype.setPosition = function(e,fixToElement){
         var x, y;
         if (fixToElement){

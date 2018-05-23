@@ -62,7 +62,8 @@ class <xsl:value-of select="@id"/>_Controller extends ControllerSQL{
 		$field_sep = $p->getVal('field_sep');
 		$field_sep = (isset($field_sep))? $field_sep:',';
 		if (isset($id_list)){
-			$model = $this->getConstantValueModel(explode($field_sep,$id_list));
+			$ar = explode($field_sep,$id_list);
+			$model = $this->getConstantValueModel($ar);
 			$this->addModel($model);
 		}
 	}

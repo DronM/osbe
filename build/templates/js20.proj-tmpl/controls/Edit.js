@@ -20,6 +20,7 @@
  * @param {string} [options.type=this.DEF_INPUT_TYPE]
  * @param {string} options.editMask
  * @param {string} options.labelCaption
+ * @param {string} options.labelOptions 
  * @param {Label} options.label
  * @param {string} options.labelClassName
  * @param {Button} options.buttonOpen
@@ -37,7 +38,9 @@
  * @param {bool} options.acMid
  * @param {PublicMethod} options.acPublicMethod
  * @param {ControllerObjServer} options.acController  
- * @param {Model} options.acModel 
+ * @param {Model} options.acModel
+ 
+ * @param {bool} [options.inline=false]
  */
 function Edit(id,options){
 	options = options || {};
@@ -89,13 +92,12 @@ function Edit(id,options){
 	if (options.label){
 		this.setLabel(options.label);
 	}	
-	else if (options.labelCaption){
-		this.setLabel(new Label(id+":label",
-			{"value":options.labelCaption,
-			"className":options.labelClassName,
-			"visible":this.getVisible()
-			}
-		));		
+	else if (options.labelCaption||options.labelOptions){
+		options.labelOptions = options.labelOptions || {"attrs":{"for":id}};
+		options.labelOptions.value = options.labelOptions.value || options.labelCaption;
+		options.labelOptions.className = options.labelOptions.className || options.labelClassName;
+		options.labelOptions.visible = this.getVisible();
+		this.setLabel(new Label(id+":label",options.labelOptions));		
 	}
 	
 	this.setErrorControl((options.errorControl!==undefined)? options.errorControl: ((this.m_html)? null:new ErrorControl(id+":error")) );
@@ -119,7 +121,7 @@ function Edit(id,options){
 	this.setFormatFunction(options.formatFunction);
 	
 	this.setLabelAlign(options.labelAlign || this.DEF_LABEl_ALIGN);
-		
+
 	this.setContClassName( (options.contClassName!==undefined)? options.contClassName:this.DEF_CONT_CLASS );
 	this.setContTagName(options.contTagName || this.DEF_CONT_TAG);	
 	this.setEditContClassName( (options.editContClassName!==undefined)? options.editContClassName : (this.DEF_EDIT_CONT_CLASS +" "+ window.getBsCol(8)) );
@@ -142,6 +144,7 @@ function Edit(id,options){
 			"control":this,
 			"keyFields":options.acKeyFields,
 			"descrFields":options.acDescrFields,
+			"descrFunction":options.acDescrFunction,
 			"icase":options.acICase,
 			"mid":options.acMid  
 			}
@@ -229,14 +232,18 @@ Edit.prototype.setValue = function(val){
 		val = this.m_validator.correctValue(val);
 	}
 	this.getNode().value = this.formatOutputValue(val);
-//	console.log("Edit.prototype.setValue val="+this.getNode().value+", "+val)
-//debugger	
+	//console.log("Edit.prototype.setValue val="+this.getNode().value+", "+val)
 	this.applyMask();
+	
+	if (this.m_eventFuncs && this.m_eventFuncs.change){
+		this.m_eventFuncs.change();
+	}
+	
 }
 
 Edit.prototype.getValue = function(){
 	if (this.m_node){
-		var v = (this.getEditMask())? $(this.getNode()).mask():this.m_node.value;
+		var v = this.getEditMask()? $(this.m_node).mask():this.m_node.value;
 		
 		if (!v || v.length==0){
 			return null;
@@ -341,7 +348,7 @@ Edit.prototype.toDOM = function(parent){
 	var node_parent;
 	if (!this.m_html){	
 		var id = this.getId();	
-//console.log("Edit.prototype.toDOM ID="+id+" visib="+this.getVisible())	
+//console.log("Edit.prototype.toDOM ID="+id+" m_labelAlign="+this.m_labelAlign)	
 		this.m_container = new ControlContainer( ((id)? id+":cont" : null),this.m_contTagName,{
 			"className":this.m_contClassName,
 			"visible":this.getVisible()
@@ -367,9 +374,7 @@ Edit.prototype.toDOM = function(parent){
 		this.m_errorControl.toDOM(node_parent);
 	}
 	
-	if (this.m_editMask){
-		$(this.getNode()).mask(this.getEditMask());
-	}
+	this.applyMask();
 	
 	if (this.m_buttons && !this.m_buttons.isEmpty()){
 		this.m_buttons.toDOMAfter(this.getNode());
@@ -378,7 +383,47 @@ Edit.prototype.toDOM = function(parent){
 	if (this.m_label && this.m_labelAlign=="right"){
 		this.m_label.toDOMAfter(this.getNode());
 	}
+}
+
+Edit.prototype.toDOMBefore = function(node){
+	var node_parent;
+	if (!this.m_html){	
+		var id = this.getId();	
+//console.log("Edit.prototype.toDOM ID="+id+" m_labelAlign="+this.m_labelAlign)	
+		this.m_container = new ControlContainer( ((id)? id+":cont" : null),this.m_contTagName,{
+			"className":this.m_contClassName,
+			"visible":this.getVisible()
+		});	
 	
+		if (this.m_label && this.m_labelAlign=="left"){
+			this.m_container.addElement(this.m_label);
+		}
+
+		this.m_editContainer = new Control( ( (id)? id+":edit-cont" : null),this.m_editContTagName,{
+				"className":this.m_editContClassName
+		});	
+		this.m_container.addElement(this.m_editContainer);
+		this.m_container.toDOMBefore(node);
+		
+		node_parent = this.m_editContainer.getNode();
+	}
+		
+	Edit.superclass.toDOM.call(this,node_parent);
+	
+	//error
+	if (this.m_errorControl){
+		this.m_errorControl.toDOM(node_parent);
+	}
+	
+	this.applyMask();
+	
+	if (this.m_buttons && !this.m_buttons.isEmpty()){
+		this.m_buttons.toDOMAfter(this.getNode());
+	}
+	
+	if (this.m_label && this.m_labelAlign=="right"){
+		this.m_label.toDOMAfter(this.getNode());
+	}
 }
 
 Edit.prototype.delDOM = function(){
@@ -420,6 +465,9 @@ Edit.prototype.setVisible = function(v){
 Edit.prototype.setEnabled = function(enabled){
 	if (this.m_buttons){
 		this.m_buttons.setEnabled(enabled);
+		if (this.getButtonOpen() && !enabled){
+			this.getButtonOpen().setEnabled(true);
+		}
 	}
 	this.setInputEnabled(enabled);
 	
@@ -507,7 +555,6 @@ Edit.prototype.getAutoComplete = function(){
 	return this.m_autoComplete;
 }
 
-
 /*
 overriden
 */
@@ -523,3 +570,7 @@ Edit.prototype.setOnValueChange = function(v){
 		EventHelper.del(this.getNode(),"keypress",this.m_onKeyPress,true);
 	}
 }
+Edit.prototype.focus = function(){
+	this.getNode().focus();
+}
+

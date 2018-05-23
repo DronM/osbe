@@ -27,6 +27,7 @@ class FieldSQL extends Field{
 	
 	private $oldValue;
 	private $sqlExpression;
+	private $retAfterInsert;
 	
 	/*if TRUE and field type is FT_LOOK_UP
 		the join table data is being taken
@@ -58,6 +59,11 @@ class FieldSQL extends Field{
 		$fieldType = (isset($options['fieldType']))?
 			$options['fieldType']:FT_DATA;
 		$this->setFieldType($fieldType);
+		
+		if (isset($options['retAfterInsert'])){
+			$this->setRetAfterInsert($options['retAfterInsert']);
+		}
+		
 		/*
 		if ($fieldType==FT_LOOK_UP){
 			if (!isset($options['lookUpDbName'])){
@@ -197,6 +203,12 @@ class FieldSQL extends Field{
 	}
 	public function setSQLExpression($expr){
 		$this->sqlExpression = $expr;
+	}
+	public function getRetAfterInsert(){
+		return $this->retAfterInsert;
+	}
+	public function setRetAfterInsert($v){
+		$this->retAfterInsert = $v;
 	}
 		
     public function getValueForDb(){

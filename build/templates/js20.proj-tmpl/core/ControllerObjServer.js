@@ -101,7 +101,7 @@ ControllerObjServer.prototype.setServConnector = function(v){
  * @param {function} options.all Arguments resp,errCode,errStr,requestId 
  * @param {function} options.ok Arguments {Response} resp, {string} requestId
  * @param {string} [retContentType=xml]: Return type. Can be one of: xml||text||json
- * @param {string} enctype Encoding for post requests
+ * @param {string} encType Encoding for post requests
 */
 ControllerObjServer.prototype.run = function(methId,options){
 	options = options || {};
@@ -112,6 +112,9 @@ ControllerObjServer.prototype.run = function(methId,options){
 	}
 	if (options.async==undefined){
 		options.async = (meth.getAsync()!=undefined)? meth.getAsync():true;
+	}
+	if (options.encType==undefined){
+		options.encType = (meth.getEncType()!=undefined)? meth.getEncType():null;
 	}
 	
 	options.retContentType = options.retContentType || "xml";
@@ -164,18 +167,21 @@ ControllerObjServer.prototype.run = function(methId,options){
 			
 		},
 		options.retContentType,
-		options.enctype
+		options.encType
 	);
 	
 	//return this.m_resp;	
 }
 
-ControllerObjServer.prototype.download = function(methId,viewId){
-	var n = document.getElementById("file_downloader");
+ControllerObjServer.prototype.download = function(methId,viewId,ind){
+	ind = (ind!=undefined)? ind:"";
+	var n_id = "file_downloader"+ind;
+	var n = document.getElementById(n_id);
 	if (!n){
 		n = document.createElement("iframe");
-		n.id = "file_downloader";
+		n.id = n_id;
 		n.style="display:none;";
+		document.body.appendChild(n);
 	}
 	var params = this.getParams(methId,viewId);
 	var par_str = "";

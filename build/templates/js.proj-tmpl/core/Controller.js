@@ -102,6 +102,7 @@ Controller.prototype.runPublicMethod = function(methodName,
 	return this.m_resp;
 }
 Controller.prototype.run = function(methId,options){
+debugger
 	options = options || {};
 	var def_err_func = function(resp,errCode,errStr){
 		WindowMessage.show({"text":errStr,"type":WindowMessage.TP_ER});

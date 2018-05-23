@@ -81,6 +81,7 @@ EditDate.prototype.toISODate = function(str){
 EditDate.prototype.getValue = function(){
 	if (this.m_node && this.m_node.value){
 		var v = (this.getEditMask())? $(this.m_node).mask():this.m_node.value;
+		//console.log("EditDate.prototype.getValue val="+this.m_node.value+" unmasked="+v)
 		
 		v = this.toISODate(v);
 		
@@ -99,22 +100,32 @@ EditDate.prototype.getValue = function(){
 EditDate.prototype.formatOutputValue = function(val){
 	return DateHelper.format(val,this.getDateFormat());
 }
+EditDate.prototype.reset = function(){
+	this.getNode().value = "";
+	this.focus();
+}
+
 /*
 EditDate.prototype.setValue = function(val){
-	if (!val){
-		this.getNode().value = "";
+	if (this.m_validator){
+		val = this.m_validator.correctValue(val);
 	}
-	else{
-		if (this.m_validator){
-			val = this.m_validator.correctValue(val);
-		}		
-		var f_val = DateHelper.format(val,this.getDateFormat());
-		this.getNode().value = f_val; 
-		
-		this.applyMask();
+	this.getNode().value = this.formatOutputValue(val);
+	console.log("Edit.prototype.setValue val="+this.getNode().value+", "+val)
+	this.applyMask();
+	
+	if (this.m_eventFuncs && this.m_eventFuncs.change){
+		this.m_eventFuncs.change();
 	}
 }
 */
+EditDate.prototype.setInitValue = function(val){
+	this.setValue(val);
+	this.setAttr(this.VAL_INIT_ATTR,this.getValue());
+	//console.log("EditDate.prototype.setInitValue to="+this.getValue())
+	//console.log("EditDate.prototype.setValue val="+this.getNode().value+", "+val)
+}
+
 EditDate.prototype.setTimeValueStr = function(v){
 	this.m_timeValueStr = v;
 }

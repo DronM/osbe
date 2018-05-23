@@ -4,3 +4,4 @@ MainMenuTree.prototype.LB_CAP_VIEW = "Объект:";
 MainMenuTree.prototype.LB_CAP_DEFAULT = "По умолчанию:";
 
 MainMenuTree.prototype.LB_CAP_GLYPHCLASS = "Класс картинки:";
+MainMenuTree.prototype.SEL_PIC_HEAD = "Выберите картинку";

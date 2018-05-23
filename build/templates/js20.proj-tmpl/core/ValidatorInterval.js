@@ -13,4 +13,4 @@
 function ValidatorInterval(options){
 	ValidatorInterval.superclass.constructor.call(this,options);
 }
-extend(ValidatorInterval,ValidatorTime);
+extend(ValidatorInterval,ValidatorString);

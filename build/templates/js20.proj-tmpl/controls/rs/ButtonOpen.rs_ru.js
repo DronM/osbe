@@ -1,1 +1,1 @@
-ButtonOpen.prototype.DEF_HINT = "открыть";
+ButtonOpen.prototype.DEF_TITLE = "открыть";

@@ -414,6 +414,7 @@ class ProjectManager extends Manager{
 	}
 	
 	public function build($log){
+	
 		$md_file = $this->getMdFile();
 
 		//open metadata xml file
@@ -889,10 +890,8 @@ DO NOT MODIFY IT!!!
 	
 		//**************** DB script *********************
 		if ($md_modif){
-			/*
-			build/sql/last_updates.sql includes last updates only
-			build/updates.sql includes all updates
-			*/
+			//build/sql/last_updates.sql includes last updates only
+			//build/updates.sql includes all updates
 			$proj_build_dir = $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR;
 			$f_last_update = $proj_build_dir.DIRECTORY_SEPARATOR. self::SQL_DIR.DIRECTORY_SEPARATOR. self::DB_LAST_UPDATE_SCRIPT;			
 			$f_update = $proj_build_dir.DIRECTORY_SEPARATOR. self::DB_UPDATE_SCRIPT;
@@ -902,7 +901,7 @@ DO NOT MODIFY IT!!!
 				$f_last_update,
 				$log
 			);
-			
+						
 			//virtrtual models to sql
 			$model_list = $xml->models->model;
 			foreach($model_list as $model){	
@@ -921,7 +920,20 @@ DO NOT MODIFY IT!!!
 				}
 			}
 			
+			//take out empty lines
+			file_put_contents($f_last_update,
+			    preg_replace("/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n", file_get_contents($f_last_update))
+			);			
+			
+			//$this->str_to_file($f_last_update,implode('', file($f_last_update, FILE_SKIP_EMPTY_LINES)));
+			/*
+			file_put_contents($f_last_update,
+			    str_replace("\n\n", "\n", file_get_contents($f_last_update))
+			);			
+			*/
+			
 			//SQL scripts to sql
+			/*
 			$sql_list = $xml->sqlScripts->sqlScript;
 			if (!is_null($sql_list)){
 				foreach($sql_list as $sql){	
@@ -938,7 +950,9 @@ DO NOT MODIFY IT!!!
 					}
 				}
 			}
+			*/
 			
+			/*
 			$cont_last_update = trim(file_get_contents($f_last_update));
 			if (strlen($cont_last_update)){
 				$this->str_to_file($f_last_update,$cont_last_update);
@@ -956,8 +970,10 @@ DO NOT MODIFY IT!!!
 				$cont_last_update
 				);
 			}
+			*/
 		}
 		//**************** DB script *********************
+		
 	
 		//Open DOM for putting last buil information && for validation
 		if ($md_modif){
@@ -974,35 +990,6 @@ DO NOT MODIFY IT!!!
 			*/
 		}
 	
-		//***************** child form **********************
-		/*
-		if ($js_exists){
-			$child_form_script = js_script_name(self::CHILD_FORM_JS_TEMPL);
-			$templ_name = str_replace('_js.tmpl','_js.xsl',self::CHILD_FORM_JS_TEMPL);
-			$templ_templ_file = $this->repoDir.DIRECTORY_SEPARATOR.self::TEMPL_DIR.DIRECTORY_SEPARATOR. $this->getJsDirectory().DIRECTORY_SEPARATOR.
-					self::CHILD_FORM_JS_TEMPL;
-							
-			$proj_templ_file = $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR.DIRECTORY_SEPARATOR. self::TEMPL_DIR.DIRECTORY_SEPARATOR. $this->getJsDirectory().DIRECTORY_SEPARATOR.$templ_name;
-							
-			if (!file_exists($proj_templ_file)
-			&&file_exists($templ_templ_file)){
-				$this->str_to_file($proj_templ_file,
-					file_get_contents($templ_templ_file)
-				);
-			}
-			if (file_exists($proj_templ_file)
-			&&filemtime($proj_templ_file)>$last_build_dt){
-				$this->transform($md_file,
-					$proj_templ_file,
-					$this->projectDir.DIRECTORY_SEPARATOR. $this->getJsDirectory().DIRECTORY_SEPARATOR. self::CONTROLLERS_DIR. js_script_name($templ_name),
-					$log
-				);
-			}
-		}
-		*/
-		//************************ Child Form *****************************
-		
-		
 		//************************ Server Documentation **************************
 		$doc_templ = $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR.DIRECTORY_SEPARATOR. self::TEMPL_DIR.DIRECTORY_SEPARATOR. self::DOC_DIR.DIRECTORY_SEPARATOR. self::DOC_TEMPL;
 		if (filemtime($doc_templ)>$last_build_dt||$md_modif){
@@ -1106,6 +1093,16 @@ DO NOT MODIFY IT!!!
 		$parent_n->appendChild($vers_n);
 		//$dom->save($md_file);	
 		self::saveDOM($dom,$md_file);
+		
+		//remove old sql
+		$build_dir = $this->projectDir.DIRECTORY_SEPARATOR. self::BUILD_DIR. $proj_build_dir.DIRECTORY_SEPARATOR;
+		if (file_exists($f = $build_dir.self::DB_UPDATE_SCRIPT)){
+			unlink($f);
+		}
+		//last update
+		if (file_exists($f = $build_dir.self::SQL_DIR.DIRECTORY_SEPARATOR.self::DB_LAST_UPDATE_SCRIPT)){
+			unlink($f);
+		}
 	}
 	
 	public function closeVersion($log){
@@ -1272,11 +1269,15 @@ DO NOT MODIFY IT!!!
 	
 	public function pull($log){
 		$git = new GitRepo($this->projectDir);
+		$git->run(sprintf('config  user.email "%s"',TECH_EMAIL));
+		$git->run(sprintf('config  user.name "%s"',GITHUB_USER));
 		$git->run('pull origin master');	
 		$log->add('Project files are pulled from the server.','warn');
 	}
 	public function push($log){
 		$git = new GitRepo($this->projectDir);
+		$git->run(sprintf('config  user.email "%s"',TECH_EMAIL));
+		$git->run(sprintf('config  user.name "%s"',GITHUB_USER));
 		$git->run('push origin master');
 		$log->add('Project files are pushed to the server.','warn');
 	}
@@ -1286,7 +1287,9 @@ DO NOT MODIFY IT!!!
 		setlocale(LC_ALL, 'ru_RU.UTF-8');
 	
 		$git = new GitRepo($this->projectDir);
-		$git->add('.');
+		$git->run(sprintf('config  user.email "%s"',TECH_EMAIL));
+		$git->run(sprintf('config  user.name "%s"',GITHUB_USER));
+		$git->add('--all .');
 		$git->commit($commitDescr, TRUE);
 	}
 	
@@ -1298,14 +1301,12 @@ DO NOT MODIFY IT!!!
 			$this->set_file_permission($this->projectDir.DIRECTORY_SEPARATOR. self::UPDATES_DIR);
 		}
 		
-		if (!file_exists($update_sql_dir)){
-			mkdir($update_sql_dir);
-			$this->set_file_permission($update_sql_dir);
-		}
-		else{
-			//$this->run_shell_cmd('rm -f -r '. $update_sql_dir.'/*');
+		if (file_exists($update_sql_dir)){
 			self::deleteDir($update_sql_dir);
-		}			
+		}
+		mkdir($update_sql_dir);
+		$this->set_file_permission($update_sql_dir);
+		
 		if (file_exists($build_dir.DIRECTORY_SEPARATOR. self::UPDATE_SQL)){
 			$sql_upd_cont = trim(file_get_contents($build_dir.DIRECTORY_SEPARATOR. self::UPDATE_SQL));
 			if (strlen($sql_upd_cont)){
@@ -1316,6 +1317,7 @@ DO NOT MODIFY IT!!!
 				);
 			}
 		}
+		/*
 		//перенести все измененные скрипты из build/sql
 		if (file_exists($build_dir.DIRECTORY_SEPARATOR. self::SQL_DIR)){
 			$struc = array();
@@ -1338,7 +1340,7 @@ DO NOT MODIFY IT!!!
 			}
 			$log->add('Copying all modified SQL scripts to update directory.','note');
 		}			
-	
+		*/
 	}
 	public function zipProject($log){
 		$log->add('Archiving files.','warn');

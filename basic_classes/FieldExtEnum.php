@@ -5,15 +5,16 @@ require_once(FRAME_WORK_PATH.'basic_classes/ValidatorString.php');
 
 class FieldExtEnum extends FieldExt {
 	const ER_NOT_IN_ENUM_VALUE = "поле '%s' - значение поля не входит в множество";
+	const DEF_ENUM_DELIM = ',';
 
 	private $enumDelim;
 	private $enumValues;
 	
-	public function __construct($id,$enumDelim,$enumValues=NULL,$options=false) {
+	public function __construct($id,$enumDelim=NULL,$enumValues=NULL,$options=FALSE) {
 		parent::__construct($id,DT_ENUM,$options);
 		$this->setValidator(new ValidatorString());
 		
-		$this->setEnumDelim($enumDelim);
+		$this->setEnumDelim(!is_null($enumDelim)? $enumDelim:self::DEF_ENUM_DELIM);
 		$this->setEnumValues($enumValues);
 	}
 	public function getEnumDelim(){

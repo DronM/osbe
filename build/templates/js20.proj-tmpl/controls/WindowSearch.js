@@ -14,7 +14,7 @@ var WindowSearch = {
 	 * @param {function} options.callBack
   	 * @param {string} options.text
   	 * @param {Control} [options.buttonClass=ButtonCmd]
-  	 * @param {Array} options.columns descr/current/ctrlClass
+  	 * @param {Array} options.columns descr/current/ctrlClass/ctrlOptions/searchType/typeChange/field
 	*/
 	show:function(options){
 		options = options || {};
@@ -25,53 +25,64 @@ var WindowSearch = {
 		
 		this.m_modalId = "search-modal";
 		
+		var cur_opts;
 		var select_opts = [];
 		for (var i=0;i<options.columns.length;i++){
-			select_opts.push(new EditSelectOption(this.m_modalId+":where:"+(i+1),{
+			var opt = new EditSelectOption(this.m_modalId+":where:"+i,{
 				"value":options.columns[i].id,
 				"checked":options.columns[i].current,
 				"descr":options.columns[i].descr
-			}));
+			});
+			opt.searchOptions = options.columns[i];
+			select_opts.push(opt);
+			if (options.columns[i].current){
+				cur_opts = opt.searchOptions;
+			}
 		}
-				
+		
+		//if(!current_class)current_class = EditString;
+		this.setSearchCtrl(cur_opts,options.text);
 		this.m_modal = new WindowFormModalBS(this.m_modalId,{
 			"contentHead":this.HEAD_TITLE,
-			"content":new ControlContainer(this.m_modalId+":cont","div",{
+			"content":new ControlContainer(this.m_modalId+":cont","DIV",{
 				"elements":[
-					new EditString(this.m_modalId+":cont:search_str",{
-						"labelCaption":this.STR_CAP,
-						"placeholder":this.STR_PLACEHOLDER,
-						"title":this.STR_TITLE,
-						"maxlength":"500",
-						"value":options.text,
-						"focus":true
-					}),
-					
+					this.m_searchCtrl,
 					new EditSelect(this.m_modalId+":where",{
 						"labelCaption":this.PAR_WHERE_CAP,
-						"elements":select_opts
+						"elements":select_opts,
+						"addNotSelected":false,
+						"events":{
+							"change":function(){			
+								var opts = this.getOption().searchOptions;
+								var how_ctrl = self.m_modal.m_body.getElement("cont").getElement("how");
+								how_ctrl.setVisible(opts.typeChange);
+								how_ctrl.setValue(opts.searchType);
+								self.setSearchCtrl(opts);
+								self.m_searchCtrl.toDOMBefore(self.m_modal.m_body.getElement("cont").getElement("where").m_container.getNode());
+							}
+						}
 					}),
-					
 					new EditRadioGroup(this.m_modalId+":how",{
 						"labelCaption":this.PAR_HOW_CAP,
+						"visible":cur_opts.typeChange,
 						"elements":[
 							new EditRadio(this.m_modalId+":cont:on_beg",{
 								"labelCaption":this.PAR_HOW_ON_BEG,
 								"name":"how_opt",
 								"value":"on_beg",
-								"checked":false
+								"checked":(cur_opts.searchType=="on_beg")
 								}),
 							new EditRadio(this.m_modalId+":cont:on_part",{
 								"labelCaption":this.PAR_HOW_ON_PART,
 								"name":"how_opt",
 								"value":"on_part",
-								"checked":true
+								"checked":(cur_opts.searchType=="on_part")
 								}),
 							new EditRadio(this.m_modalId+":cont:on_match",{
 								"labelCaption":this.PAR_HOW_ON_MATCH,
 								"name":"how_opt",
 								"value":"on_match",
-								"checked":false
+								"checked":(cur_opts.searchType=="on_match")
 								})
 						]
 					})
@@ -95,16 +106,46 @@ var WindowSearch = {
 			self.m_modalOpenFunc.call(self.m_modal);
 			self.m_modal.m_footer.getElement("btn-ok").getNode().focus();
 		}
-		this.m_modal.close = function(res){
-			self.delEvents();			
+		this.m_modal.close = function(res){			
+			var res_struc;
+			if (res==self.RES_OK){
+				var cont = self.m_modal.m_body.getElement("cont");
+				var ctrl = cont.getElement("search_ctrl");
 			
-			var cont = self.m_modal.m_body.getElement("cont");
-			self.m_callBack(res,{
-				"search_str":cont.getElement("search_str").getValue(),
-				"where":cont.getElement("where").getValue(),
-				"how":cont.getElement("how").getValue()
-			
-			});
+				//*** search value ***
+				if (ctrl.getIsRef && ctrl.getIsRef()
+				&& !(ctrl.searchField.getDataType()==Field.prototype.DT_JSON || ctrl.searchField.getDataType()==Field.prototype.DT_JSONB)
+				){			
+					//reference field with keys					
+					var keyIds = ctrl.getKeyIds();
+					if (keyIds.length>=1){
+						ctrl.searchField.setValue(ctrl.getKeys()[keyIds[0]]);
+					}
+				}
+				else{
+					//simple field
+					var val = ctrl.getValue();
+					if (ctrl.setValid)ctrl.setValid();
+				
+					try{
+						if (ctrl.getValidator && ctrl.getValidator())ctrl.getValidator().validate(val);
+					
+						ctrl.searchField.setValue(val);
+					}
+					catch(e){
+						if (ctrl.setNotValid)ctrl.setNotValid(e.message);
+						//throw new Error("Обнаружены ошибки!");
+						return;
+					}							
+				}
+				res_struc = {
+					"search_str":ctrl.searchField.getValueXHR(),
+					"where":ctrl.searchField.getId(),//cont.getElement("where").getValue(),
+					"how":cont.elementExists("how")? cont.getElement("how").getValue():"match"			
+				}				
+			}			
+			self.delEvents();
+			self.m_callBack(res,res_struc);
 			self.m_modalCloseFunc.call(self.m_modal);
 		}
 		
@@ -174,6 +215,24 @@ var WindowSearch = {
 				break;												
 		}		
 		return res;
+	},
+	setSearchCtrl:function(opts,ctrlValue){
+		
+		if (this.m_searchCtrl){			
+			this.m_searchCtrl.delDOM();
+			delete this.m_searchCtrl;			
+		}
+		//CommonHelper.merge(opts.ctrlOptions,
+		var ctrl_opts = {
+			"labelCaption":this.STR_CAP,
+			"placeholder":this.STR_PLACEHOLDER,
+			"title":this.STR_TITLE,
+			"maxlength":"500",
+			"value":ctrlValue,
+			"focus":true
+		};
+		this.m_searchCtrl = new opts.ctrlClass(this.m_modalId+":cont:search_ctrl",ctrl_opts);
+		this.m_searchCtrl.searchField = opts.field;
 	}
-	
 }
+

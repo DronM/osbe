@@ -31,7 +31,10 @@
  * @param {object} options.ctrlClass
  * @param {string} options.ctrlBindFieldId
  * @param {Field} options.ctrlBindField
- * @param {Field} options.ctrlOptions 
+ * @param {Field} options.ctrlOptions
+ 
+ * @param {object} options.searchOptions sType match/on_part/on_beg
+ * @param {bool} [options.searchable=true]
  */
  
 function GridColumn(options){
@@ -84,6 +87,9 @@ function GridColumn(options){
 	this.m_ctrlBindField = options.ctrlBindField;
 	
 	this.m_grid = options.grid;
+	
+	this.setSearchOptions(options.searchOptions);
+	this.setSearchable((options.searchable!=undefined)? options.searchable:true);
 }
 
 /* Constants */
@@ -266,5 +272,23 @@ GridColumn.prototype.getCtrlEdit = function(){
 }
 GridColumn.prototype.setCtrlEdit = function(v){
 	this.m_ctrlEdit = v;
+}
+
+GridColumn.prototype.setVisible = function(v){
+	this.getHeadCell().setVisible(v);
+	this.m_cellOptions = this.m_cellOptions || {};
+	this.m_cellOptions.visible = v;
+}
+GridColumn.prototype.getSearchOptions = function(){
+	return this.m_searchOptions;
+}
+GridColumn.prototype.setSearchOptions = function(v){
+	this.m_searchOptions = v;
+}
+GridColumn.prototype.getSearchable = function(){
+	return this.m_searchable;
+}
+GridColumn.prototype.setSearchable = function(v){
+	this.m_searchable = v;
 }
 

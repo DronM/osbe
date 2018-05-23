@@ -115,6 +115,7 @@ ModelXML.prototype.fetchRow = function(row){
 					 */
 				}
 				else if (t_val!==null){
+				//console.log("Setting id="+fid+" t_val="+t_val)
 					this.m_fields[fid].setValue(t_val);
 				}				
 			}			
@@ -242,7 +243,8 @@ ModelXML.prototype.initSequences = function(){
 				}
 			}
 		}
-		//CommonHelper.log("Sequence "+sid+"="+this.m_sequences[sid])
+		//console.log("Sequence "+sid+"=")
+		//console.dir(this.m_sequences[sid])
 	}
 }
 //****************************************************************************************
@@ -289,6 +291,17 @@ ModelXML.prototype.setData = function(data){
 		throw new Error(CommonHelper.format(this.ER_NO_MODEL,[this.getId()]));
 	}
 	
+	//lazy field definition based on data
+	if (!this.m_fields
+	&& this.m_node.childNodes && this.m_node.childNodes.length && this.m_node.childNodes[0].nodeName==this.getTagRow()
+	&& this.m_node.childNodes[0].childNodes){
+		this.m_fields = {};
+		for (var i=0;i<this.m_node.childNodes[0].childNodes.length;i++){
+			var fid = this.m_node.childNodes[0].childNodes[i].nodeName;
+			this.m_fields[fid] = new FieldString(fid);
+		}
+	}
+	
 	if (this.m_node["toString"]){
 		this.m_node["toString"] = function(){
 			return this.outerHTML;
@@ -297,6 +310,7 @@ ModelXML.prototype.setData = function(data){
 	
 	if (!no_data){
 		this.initSequences();
+		this.reindex();
 	}		
 	ModelXML.superclass.setData.call(this,data);
 }

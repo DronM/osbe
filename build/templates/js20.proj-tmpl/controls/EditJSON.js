@@ -8,8 +8,8 @@
  * @classdesc
  
  * @param {string} id - Object identifier
- * @param {Object} options
- * @param {string} options.className
+ * @param {object} options
+ * @param {object} options.valueJSON
  */
 function EditJSON(id,options){
 	options = options || {};	
@@ -34,10 +34,13 @@ extend(EditJSON,ControlContainer);
 EditJSON.prototype.getValueJSON = function(){	
 	var o = {};
 	for (var elem_id in this.m_elements){
-		if (this.m_elements[elem_id]){
+		//input elements
+		if (this.m_elements[elem_id] && this.m_elements[elem_id].getModified){
 			o[elem_id] = this.m_elements[elem_id].getValue();
 		}
-	}	
+	}
+	//console.log("EditJSON.prototype.getValueJSON")	
+	//console.dir(o)
 	return o;
 }
 

@@ -10,7 +10,7 @@
  * @requires controls/ControlContainer.js     
   
  * @param {string} id - html tag id
- * @param {namespase} options
+ * @param {object} options
  * @param {string} [options.ControlContainer=modal]
  * @param {string} [options.headerClassName=modal-header]
  * @param {Control|string} options.contentHead 
@@ -31,6 +31,8 @@
 function WindowFormModalBS(id,options){
 	options = options || {};	
 	
+	var self = this;
+	
 	//options.template = WindowFormModalBS_tmpl;
 	options.className = options.className || "modal";//fade
 	options.attrs = options.attrs||{};
@@ -42,18 +44,31 @@ function WindowFormModalBS(id,options){
 	this.m_content = new ControlContainer(id+"_cont","div",{className:"modal-content"});
 	
 	this.m_header = new ControlContainer(id+"_head","div",{className: (options.headerClassName || "modal-header") });
+	//"data-dismiss":"modal"
+	/*
 	this.m_header.addElement(new Control(id+"_close","button",{
 		className:"close",
-		attrs:{"data-dismiss":"modal","aria-label":"Close"}
+		"attrs":{"aria-label":"Close"},
+		"events":{
+			"click":function(){
+				self.close();
+			}
+		}
 	}));
+	*/
 	this.m_header.addElement(new Control(null,"button",{
 		"attrs":{
 			"type":"button",
 			"class":"close",
-			"data-dismiss":"modal",
+			//"data-dismiss":"modal",
 			"aria-hidden":"true"
 		},
-		"value":"×"
+		"value":"×",
+		"events":{
+			"click":function(){
+				self.close();
+			}
+		}
 	}));
 	if (options.contentHead){
 		if (typeof(options.contentHead)=="object"){
@@ -76,8 +91,6 @@ function WindowFormModalBS(id,options){
 	if (options.contentFoot){
 		this.m_footer.addElement(options.contentFoot);
 	}
-	
-	var self = this;
 	
 	if (options.cmdOk || options.controlOk || options.onClickOk){
 		this.m_footer.addElement(options.controlOk ||

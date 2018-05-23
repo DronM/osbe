@@ -8,15 +8,12 @@
 
  * @requires core/extend.js  
  * @requires controls/WindowQuestion.js
- * @requires controls/GridHead.js
- * @requires controls/GridBody.js
- * @requires controls/GridFoot.js
  * @requires controls/EditString.js     
  
  * @param {string} id Object identifier
  * @param {object} options
  * @param {string} [options.labelClassName=control-label col-lg-11]
- * @param {string} [options.editContClassName=input-group col-lg-11]
+ * @param {string} [options.editContClassName=input-group col-lg-1]
  */
 function EditRadio(id,options){
 	options = options || {};
@@ -26,8 +23,8 @@ function EditRadio(id,options){
 	
 	
 	var bs_col = window.getApp().getBsCol();	
-	options.labelClassName = options.labelClassName || ("control-label "+(bs_col+"11"));	
-	options.editContClassName = options.contClassName || ("input-group "+bs_col+"1");
+	options.labelClassName = (options.labelClassName!=undefined)? options.labelClassName : ("control-label "+(bs_col+"11"));	
+	options.editContClassName = (options.editContClassName!=undefined)? options.editContClassName : ("input-group "+bs_col+"1");
 	
 	EditRadio.superclass.constructor.call(this,id,options);
 	

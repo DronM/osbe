@@ -36,12 +36,12 @@ extend(<xsl:value-of select="$enum_id"/>,GridColumnEnum);
 <xsl:template match="value">
 <xsl:if test="position() = 1">
 <xsl:for-each select="./*">
-	options.multyLangValues.<xsl:value-of select="local-name()"/> = {};
+	options.multyLangValues["<xsl:value-of select="local-name()"/>"] = {};
 </xsl:for-each>
 </xsl:if>
 
 <xsl:for-each select="./*">
-	options.multyLangValues.<xsl:value-of select="local-name()"/>.<xsl:value-of select="../@id"/> = "<xsl:value-of select="@descr"/>";
+	options.multyLangValues["<xsl:value-of select="local-name()"/>"]["<xsl:value-of select="../@id"/>"] = "<xsl:value-of select="@descr"/>";
 </xsl:for-each>
 
 </xsl:template>

@@ -27,7 +27,7 @@ var DateHelper = {
 		}
 		else if (ds.length>12 && t_offset_p==-1 && ds.substr(ds.length-1,1)!="Z"){
 			//no time zone
-			ds+="+05:00";//ToDo locale offset
+			ds+= window.getApp().getTimeZoneOffsetStr();//"+05:00";
 		}
 		else if (t_offset_p!=-1){
 			//
@@ -35,7 +35,7 @@ var DateHelper = {
 			for (var i=t_offset_ar.length;i<2;i++){
 				t_offset_ar.push("00");
 			}
-			ds = ds.substr(0,t_offset_p-1)+"+"+t_offset_ar.join(":");
+			ds = ds.substr(0,t_offset_p)+"+"+t_offset_ar.join(":");
 		}
 		var d = new Date(ds);
 		//console.log("strtotime ds="+ds+" date="+d)
@@ -122,7 +122,7 @@ var DateHelper = {
 	},
 	
 	format:function(dt,fs){
-		add_zero = function(arg){
+		var add_zero = function(arg){
 			var s = arg.toString();
 			return ((s.length<2)? "0":"")+s;
 		};
@@ -132,7 +132,8 @@ var DateHelper = {
 		}
 		*/
 		if (!dt || !dt.getDate){
-			throw Error("DateHelper.format Invalid date "+dt);
+			//throw Error("DateHelper.format Invalid date "+dt);
+			return "";
 		}
 		
 		if (!fs){
@@ -161,10 +162,12 @@ var DateHelper = {
 		s = s.replace(/s/,add_zero(dt.getSeconds()));
 		//msec
 		s = s.replace(/u/,add_zero(dt.getMilliseconds()));
-		
+		//console.log("DateHelper.format dt="+dt+" fs="+fs+" res="+s)
 		return s;
 	},
-	/* 07:01:05 -->> 7*60*60*1000 + 1*60*1000 + 5*1000 */
+	/* 07:01:05.0001 -->> 7*60*60*1000+1 + 1*60*1000 + 5*1000
+	To Do MS Support!!!
+	*/
 	timeToMS:function(timeStr){
 		if (timeStr==undefined){
 			return 0;
@@ -174,6 +177,7 @@ var DateHelper = {
 		var h = 0;
 		var m = 0;
 		var s = 0;
+		var ms = 0;
 
 		if (time_ar.length>=1){
 			h = parseInt(time_ar[0][0],10)*10+
@@ -191,7 +195,7 @@ var DateHelper = {
 				parseInt(time_ar[2][1],10);
 			s = ( isNaN(s)? 0:s);
 		}
-		return (h*60*60*1000 + m*60*1000 + s*1000);
+		return (h*60*60*1000 + m*60*1000 + s*1000 + ms);
 	},
 
 	weekStart : function(dt) {
@@ -268,6 +272,5 @@ var DateHelper = {
 	    var day = d.getDay();
 	    d.setDate(d.getDate() + n + (day === 6 ? 2 : +!day) + (Math.floor((n - 1 + (day % 6 || 1)) / 5) * 2));
 	    return d;
-	}	
-		
+	}
 }

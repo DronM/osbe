@@ -57,7 +57,7 @@ class ControllerSQL extends ControllerDb{
 	
 	/*
 	*/
-	public function modelGetList($model,$pm=null){		
+	public function modelGetList($model,$pm=null){	
 		$this->beforeSelect();
 		if (is_null($pm)){
 			$pm = $this->getPublicMethod(ControllerDb::METH_GET_LIST);		
@@ -144,6 +144,7 @@ class ControllerSQL extends ControllerDb{
 		$model = new ModelSQL($this->getDbLink(),array('id'=>$modelId));
 		$model->query($query,$toXML);
 		$this->addModel($model);
+		return $model;
 	}
 	
 	public function conditionFromParams($pm,$model){
@@ -187,11 +188,30 @@ class ControllerSQL extends ControllerDb{
 						$ind = array_search('e',$sgn_keys_ar);
 					}
 					if ($ind>=0){
-											
-						if ($sgn_ar[$ind]=='LIKE'){
-							//soft validation: all values considered strings
-							$ext_class = 'FieldExtString';
-							$field = new FieldSQLString($this->getDbLink(),null,null,$condFields[$i]);
+						$ic = NULL;					
+						if ($sgn_ar[$ind]=='LIKE'){							
+							$f_dt = $model->getFieldById($condFields[$i])->getDataType();
+							if ($f_dt==DT_DATETIME||$f_dt==DT_DATETIMETZ){
+								//date part condition									
+								if($condVals[$i][0]=="%"){
+									$condVals[$i] = substr($condVals[$i],1);
+								}
+								$v_len = strlen($condVals[$i]);
+								if($condVals[$i][$v_len-1]=="%"){
+									$condVals[$i] = substr($condVals[$i],0,$v_len-1);
+								}
+								$field = new FieldSQLDate($this->getDbLink(),null,null,$condFields[$i]);
+								$ext_field = new FieldExtDate($field->getId());
+								$ext_field->setValue($condVals[$i]);								
+								$field->setValue($ext_field->getValue());
+								$where->addExpression($condFields[$i], sprintf("%s::date=%s",$condFields[$i],$field->getValueForDb()));
+								continue;
+							}
+							else{
+								//soft validation: all values considered strings
+								$ext_class = 'FieldExtString';
+								$field = new FieldSQLString($this->getDbLink(),null,null,$condFields[$i]);
+							}
 						}
 						else{
 							$field = clone $model->getFieldById($condFields[$i]);
@@ -228,8 +248,8 @@ class ControllerSQL extends ControllerDb{
 							$ext_field->setValue($condVals[$i]);
 							$field->setValue($ext_field->getValue());
 							//echo 'ind='.$i.' val='.$ext_field->getValue();
-						
-							$ic = (count($condInsen)>$i)? ($condInsen[$i]=='1'):FALSE;
+							if (is_null($ic))
+								$ic = (count($condInsen)>$i)? ($condInsen[$i]=='1'):FALSE;
 							/*
 							if (count($condInsen)>$i){
 								$ic = ($condInsen[$i]=='1');

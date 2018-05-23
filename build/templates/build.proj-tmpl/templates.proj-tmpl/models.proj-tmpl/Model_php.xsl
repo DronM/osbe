@@ -7,7 +7,13 @@
 			doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"/>
 			
 <xsl:template match="model"><![CDATA[<?php]]>
-<xsl:call-template name="add_requirements"/>
+/**
+ *
+ * THIS FILE IS GENERATED FROM TEMPLATE build/templates/models/Model_php.xsl
+ * ALL DIRECT MODIFICATIONS WILL BE LOST WITH THE NEXT BUILD PROCESS!!!
+ *
+ */
+<xsl:call-template name="add_requirements"/> 
 class <xsl:value-of select="@id"/>_Model extends <xsl:value-of select="@parent"/>{
 	<xsl:call-template name="add_constructor"/>
 }
@@ -18,6 +24,7 @@ class <xsl:value-of select="@id"/>_Model extends <xsl:value-of select="@parent"/
 	<xsl:variable name="baseModelId" select="../@baseModelId"/>
 	<xsl:variable name="fieldId" select="@id"/>
 	<xsl:variable name="baseField" select="/metadata/models/model[@id=$baseModelId]/field[@id=$fieldId]"/>
+	<xsl:if test="not($baseModelId) or not($baseField)">
 	<xsl:variable name="dataType">
 	<xsl:choose>
 	<xsl:when test="../@virtual='TRUE' and $baseModelId and not(@dataType)"><xsl:value-of select="$baseField/@dataType"/></xsl:when>
@@ -100,9 +107,12 @@ class <xsl:value-of select="@id"/>_Model extends <xsl:value-of select="@parent"/
 		</xsl:if>		
 		<xsl:if test="@id">$f_opts['id']="<xsl:value-of select="@id"/>";
 		</xsl:if>
+		<xsl:if test="@retAfterInsert">$f_opts['retAfterInsert']=<xsl:value-of select="@retAfterInsert"/>;
+		</xsl:if>		
 		$f_<xsl:value-of select="@id"/>=new FieldSQL<xsl:value-of select="$dataType"/>($this->getDbLink(),$this->getDbName(),$this->getTableName(),"<xsl:value-of select="@id"/>",$f_opts);
 		$this->addField($f_<xsl:value-of select="@id"/>);
 		//********************
+	</xsl:if>
 </xsl:template>
 
 <xsl:template match="defaultOrder">
@@ -119,46 +129,49 @@ class <xsl:value-of select="@id"/>_Model extends <xsl:value-of select="@parent"/
 </xsl:template>
 
 <xsl:template name="add_requirements">
+<xsl:variable name="baseModelId" select="@baseModelId"/>
 require_once(FRAME_WORK_PATH.'basic_classes/<xsl:value-of select="@parent"/>.php');
-<xsl:if test="field[@dataType='Int']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLInt.php');
+<xsl:if test="field[@dataType='Int'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Int'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLInt.php');
 </xsl:if>
-<xsl:if test="field[@dataType='String']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLString.php');
+<xsl:if test="field[@dataType='String'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='String'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLString.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Text']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLText.php');
+<xsl:if test="field[@dataType='Text'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Text'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLText.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Float']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLFloat.php');
+<xsl:if test="field[@dataType='Float'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Float'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLFloat.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Enum']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLEnum.php');
+<xsl:if test="field[@dataType='Enum'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Enum'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLEnum.php');
 </xsl:if>
-<xsl:if test="field[@dataType='DateTime']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLDateTime.php');
+<xsl:if test="field[@dataType='DateTime'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='DateTime'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLDateTime.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Date']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLDate.php');
+<xsl:if test="field[@dataType='Date'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Date'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLDate.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Time']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLTime.php');
+<xsl:if test="field[@dataType='Time'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Time'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLTime.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Password']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLPassword.php');
+<xsl:if test="field[@dataType='Password'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Password'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLPassword.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Char']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLChar.php');
+<xsl:if test="field[@dataType='Char'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Char'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLChar.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Bool']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLBool.php');
+<xsl:if test="field[@dataType='Bool'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Bool'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLBool.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Interval']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLInterval.php');
+<xsl:if test="field[@dataType='Interval'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Interval'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLInterval.php');
 </xsl:if>
 <xsl:if test="defaultOrder">require_once(FRAME_WORK_PATH.'basic_classes/ModelOrderSQL.php');
 </xsl:if>
-<xsl:if test="field[@dataType='DateTimeTZ']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLDateTimeTZ.php');
+<xsl:if test="field[@dataType='DateTimeTZ'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='DateTimeTZ'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLDateTimeTZ.php');
 </xsl:if>
-<xsl:if test="field[@dataType='JSON']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLJSON.php');
+<xsl:if test="field[@dataType='JSON'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='JSON'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLJSON.php');
 </xsl:if>
-<xsl:if test="field[@dataType='JSONB']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLJSONB.php');
+<xsl:if test="field[@dataType='JSONB'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='JSONB'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLJSONB.php');
 </xsl:if>
-<xsl:if test="field[@dataType='Array']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLArray.php');
+<xsl:if test="field[@dataType='Array'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Array'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLArray.php');
 </xsl:if>
-<xsl:if test="field[@dataType='XML']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLXML.php');
+<xsl:if test="field[@dataType='XML'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='XML'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLXML.php');
 </xsl:if>
-<xsl:if test="field[@dataType='BigInt']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLBigInt.php');
+<xsl:if test="field[@dataType='BigInt'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='BigInt'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLBigInt.php');
 </xsl:if>
-<xsl:if test="field[@dataType='SmallInt']">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLSmallInt.php');
+<xsl:if test="field[@dataType='SmallInt'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='SmallInt'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLSmallInt.php');
+</xsl:if>
+<xsl:if test="field[@dataType='Bytea'] or ($baseModelId and /metadata/models/model[@id=$baseModelId]/field[@dataType='Bytea'])">require_once(FRAME_WORK_PATH.'basic_classes/FieldSQLBytea.php');
 </xsl:if>
 
 </xsl:template>
@@ -170,6 +183,10 @@ require_once(FRAME_WORK_PATH.'basic_classes/<xsl:value-of select="@parent"/>.php
 		$this->setDbName("<xsl:choose><xsl:when test="@dataSchema"><xsl:value-of select="@dataSchema"/></xsl:when><xsl:when test="/metadata/@dataSchema"><xsl:value-of select="/metadata/@dataSchema"/></xsl:when><xsl:otherwise></xsl:otherwise></xsl:choose>");
 		
 		$this->setTableName("<xsl:value-of select="@dataTable"/>");
+		<xsl:if test="@baseModelId">
+		<xsl:variable name="base_model_id" select="@baseModelId"/>
+		<xsl:apply-templates select="/metadata/models/model[@id=$base_model_id]/field"/>		
+		</xsl:if>
 		<xsl:apply-templates select="field"/>		
 		<xsl:apply-templates select="defaultOrder"/>
 		

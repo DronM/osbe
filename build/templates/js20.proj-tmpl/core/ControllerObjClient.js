@@ -65,6 +65,12 @@ ControllerObjClient.prototype.addInsert = function(){
 				else{
 					throw new Error(this.ER_UNSUPPORTED_CLIENT_MODEL);
 				}
+				/*
+				for(var fid in key_model_fields){
+					model.setFieldValue(fid,key_model_fields[fid]);					
+				}
+				*/
+				model.recInsert();
 				resp.setModelData("InsertedId_Model",model.getData());
 				options.ok(resp);
 			}						
@@ -182,6 +188,8 @@ ControllerObjClient.prototype.publicMethodFieldsToModel = function(sFields,tFiel
 			tFields[id].setValue(sFields[id].getValue());
 		}
 	}
+	//console.log("publicMethodFieldsToModel tFields=")
+	//console.dir(tFields)
 }
 
 ControllerObjClient.prototype.makeResponse = function(rows){

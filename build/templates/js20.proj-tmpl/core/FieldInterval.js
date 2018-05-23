@@ -15,4 +15,4 @@ function FieldInterval(id,options){
 	options.dataType = this.DT_INTERVAL;
 	FieldInterval.superclass.constructor.call(this,id,options);
 }
-extend(FieldInterval,FieldTime);
+extend(FieldInterval,FieldString);

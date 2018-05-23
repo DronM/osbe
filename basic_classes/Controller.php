@@ -176,13 +176,19 @@ class Controller {
 				return ($this->$methId($pm)===TRUE);
 			}
 			catch (Exception $e){
-				//ошибки postgre
-				$em = str_replace('ОШИБКА: ','',$e->getMessage());				
-				$ar = explode('@',$em);
-				$er_code=(count($ar)>1)? $ar[1]:1;
-				$resp->result = $er_code;
-				if (count($ar)){
-					$resp->descr = htmlspecialchars($ar[0]);	
+				$ar = explode('@',$e->getMessage());
+				$resp->result = (count($ar)>1)? intval($ar[1]) : 1;
+				if ($resp->result==0){
+					$resp->result = 1;
+				}
+				if (count($ar)){		
+					//$resp->descr = htmlspecialchars(str_replace("exception 'Exception' with message",'','111='.$ar[0]));		
+					$er_s = str_replace('ОШИБКА: ','',$ar[0]);//ошибки postgre
+					$er_s = str_replace("exception 'Exception' with message '",'',$er_s);
+					$resp->descr = htmlspecialchars($er_s);
+				}
+				else{
+					$resp->descr = $e->getMessage();
 				}
 				
 				//$resp->result = 1;

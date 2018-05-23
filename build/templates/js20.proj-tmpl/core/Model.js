@@ -5,8 +5,8 @@
  * @classdesc Basic Model, has abstract functions that are to be overridden in extended classes
  
  * @param {string} id - Model identifier
- * @param {namespace} options
- * @param {namespace} options.fields
+ * @param {object} options
+ * @param {object} options.fields
  * @param {string|object} options.data
  * @param {bool} [options.primaryKeyIndex=false]
  */
@@ -79,7 +79,7 @@ Model.prototype.updateRow = function(row){
  */
 Model.prototype.resetFields = function(){
 	if (!this.m_fields){
-		throw new Error(CommonHelper.format(this.ER_NO_FIELDS,[id]));
+		throw new Error(CommonHelper.format(this.ER_NO_FIELDS,[this.getId()]));
 	}
 	for (var id in this.m_fields){
 		this.m_fields[id].unsetValue();
@@ -218,6 +218,25 @@ Model.prototype.getFields = function(){
 
 /**
  * @public
+ * @returns {int}
+ */
+Model.prototype.getRowIndex = function(){
+
+	return this.m_rowIndex;
+}
+
+/**
+ * synonym of getRow
+ * @public
+ * @param {int} ind
+ * @returns {bool}
+ */
+Model.prototype.setRowIndex = function(ind){
+	return this.getRow(ind);
+}
+
+/**
+ * @public
  * @returns {bool}
  * @param {string} id Field id
  */
@@ -292,7 +311,7 @@ Model.prototype.setFields = function(v){
  */
 Model.prototype.addField = function(f){
 	if (!this.m_fields){
-		throw new Error(CommonHelper.format(this.ER_NO_FIELDS,[id]));
+		throw new Error(CommonHelper.format(this.ER_NO_FIELDS,[this.getId()]));
 	}
 
 	this.m_fields[f.getId()] = f;
@@ -454,6 +473,29 @@ Model.prototype.getId = function(){
  * @public 
  */
 Model.prototype.clear = function(){
+}
+
+/**
+ * @public
+ * @param {int} ind row index to move
+ * @param {int} cnt count, can be negative
+ */
+Model.prototype.recMove = function(ind,cnt){
+}
+
+/**
+ * @public
+ * @param {int} ind row index to move 
+ */
+Model.prototype.recMoveUp = function(ind){
+	this.recMove(ind,-1);
+}
+/**
+ * @public
+ * @param {int} ind row index to move 
+ */
+Model.prototype.recMoveDown = function(ind){
+	this.recMove(ind,1);
 }
 
 //******** INDEX ***********************

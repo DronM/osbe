@@ -12,9 +12,6 @@
  * @param {Object} options
  * @param {namespace} options.fields
  * @param {string|XMLNode} options.data - Can either be a string or a XML node
- 
- * @param {string} [options.keyFieldId=DEF_KEY_FIELD_ID]
- 
  */
 function ModelXMLTree(id,options){	
 	
@@ -25,7 +22,6 @@ extend(ModelXMLTree,ModelXML);
 /* CONSTANTS */
 ModelXMLTree.prototype.DEF_TAG_MODEL = "root";
 ModelXMLTree.prototype.DEF_TAG_ROW = "item";
-ModelXMLTree.prototype.DEF_KEY_FIELD_ID = "id";
 
 /* private members */
 ModelXMLTree.prototype.m_parentNode;

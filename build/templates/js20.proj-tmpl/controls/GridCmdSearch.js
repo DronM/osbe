@@ -63,28 +63,51 @@ GridCmdSearch.prototype.showDialog = function(str){
 	var grid_columns = this.m_grid.getHead().getColumns();	
 	for (var i in grid_columns){
 		var f = grid_columns[i].getField();
-		if (f){
+		if (f && grid_columns[i].getSearchable()){
 			//console.log("Type="+f.getDataType())
 			var fid = f.getId();
+			var col_sopts = grid_columns[i].getSearchOptions()||{};
 			var sStruc = {
 				"id":fid,
 				"descr":grid_columns[i].getHeadCell().getValue(),
 				"current":(cur_field_id==fid),
-				"ctrlClass":undefined,
-				'sType':undefined
+				"ctrlClass":grid_columns[i].getCtrlClass(),
+				"ctrlOptions":grid_columns[i].getCtrlOptions() || {},
+				"searchType": col_sopts.searchType || "on_part",
+				"typeChange": col_sopts.typeChange,
+				"field": col_sopts.field || f
 			};
-			if (f.getDataType()==f.DT_DATE){
-				sStruc.ctrlClass = EditDate;
-				sStruc.sType = 'match';
+			if(sStruc.typeChange==undefined)sStruc.typeChange=true;			
+			var data_t = f.getDataType();
+			if (data_t==f.DT_DATE){
+				if(!sStruc.ctrlClass)sStruc.ctrlClass = EditDate;
+				if(!sStruc.searchType)sStruc.searchType = "on_match";
+				sStruc.typeChange = false;
 			}
-			else if (f.getDataType()==f.DT_DATETIME){
-				sStruc.ctrlClass = EditDateTime;
-				sStruc.sType = 'match';
+			else if (data_t==f.DT_DATETIME||data_t==f.DT_DATETIMETZ){
+				if(!sStruc.ctrlClass)sStruc.ctrlClass = EditDateTime;
+				if(!sStruc.searchType)sStruc.searchType = "on_match";
+				sStruc.typeChange = false;
 			}
-			else{
+			else if (data_t==f.DT_INT||data_t==f.DT_INT_UNSIGNED){
+				if(!sStruc.ctrlClass)sStruc.ctrlClass = EditInt;
+			}
+			else if (data_t==f.DT_FLOAT_UNSIGNED||data_t==f.DT_FLOAT){
+				if(!sStruc.ctrlClass)sStruc.ctrlClass = EditFloat;
+			}
+			else if (data_t==f.DT_BOOL){
+				if(!sStruc.ctrlClass)sStruc.ctrlClass = EditCheckBox;
+				sStruc.searchType = "on_match";
+				sStruc.typeChange = false;
+			}
+			else if (data_t==f.DT_EMAIL){
+				if(!sStruc.ctrlClass)sStruc.ctrlClass = EditEmail;
+			}
+			
+			else if(!sStruc.ctrlClass){
 				sStruc.ctrlClass = EditString;
-				sStruc.sType = 'on_part';
 			}
+			if(sStruc.searchType==undefined)sStruc.searchType="on_part";
 			columns.push(sStruc);	
 		}
 	}

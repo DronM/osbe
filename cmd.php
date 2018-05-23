@@ -75,10 +75,12 @@ try{
 	}
 	*/
 	//*************************
+	$expSec = (defined('SESSION_EXP_SEC'))? SESSION_EXP_SEC:0;
 	$session = new SessManager();
-	$session->start_session('_s', $dbLinkMaster,$dbLink);
+	$session->start_session('_s', $dbLinkMaster,$dbLink,FALSE,$expSec);
 	//*************************
-
+//echo var_dump($_SESSION);
+//exit;
 	if (defined('PARAM_TOKEN')
 	&& defined('TOKEN_AFTER_EXPIR_METHODS')
 	&& isset($token)
@@ -103,7 +105,23 @@ try{
 		//php locale		
 		date_default_timezone_set($_SESSION['user_time_locale']);
 	}
-		
+	
+	if (isset($_SESSION['LOGGED'])){
+		$now = time();
+		//$sess_len = (isset($_SESSION['sess_len']))? $_SESSION['sess_len'] : ( (defined('SESSION_EXP_SEC'))? SESSION_EXP_SEC : 0);
+		//throw new Exception("Now=".$now.' sess_discard_after='.$_SESSION['sess_discard_after'].' len='.$sess_len);
+		if (isset($_SESSION['sess_discard_after']) && $now > $_SESSION['sess_discard_after']) {
+			session_unset();
+			session_destroy();
+			session_start();
+			throw new Exception(ERR_AUTH_EXP);
+		}
+		$sess_len = (isset($_SESSION['sess_len']))? $_SESSION['sess_len'] : ( (defined('SESSION_EXP_SEC'))? SESSION_EXP_SEC : 0);
+		if ($sess_len){
+			$_SESSION['sess_discard_after'] = $now + $sess_len;
+		}
+	}
+			
 	if (!isset($_SESSION['scriptId'])){
 		$_SESSION['scriptId'] = md5(session_id());
 	}
@@ -193,13 +211,14 @@ try{
 	}
 	
 	require_once($v_script);
-
+	
 	if (!$contrObj->runPablicMethod($meth,$_REQUEST)){
 		/*if nothing has been sent yet - default output*/
 		$contrObj->write($view_class,$view);
 	}
 }
 catch (Exception $e){
+	//Uncought exceptions
 	if (defined('PARAM_TEMPLATE')){
 		unset($_REQUEST[PARAM_TEMPLATE]);
 	}
@@ -207,10 +226,18 @@ catch (Exception $e){
 	$resp = new ModelServResponse();				
 	$contrObj->addModel($resp);	
 	$ar = explode('@',$e->getMessage());
-	$er_code=(count($ar)>1)? $ar[1]:1;
-	$resp->result = $er_code;
-	if (count($ar)){
-		$resp->descr = htmlspecialchars($ar[0]);	
+	$resp->result = (count($ar)>1)? intval($ar[1]) : 1;
+	if ($resp->result==0){
+		$resp->result = 1;
+	}
+	if (count($ar)){		
+		//$resp->descr = htmlspecialchars(str_replace("exception 'Exception' with message",'','111='.$ar[0]));		
+		$er_s = str_replace('ОШИБКА: ','',$ar[0]);//ошибки postgre
+		$er_s = str_replace("exception 'Exception' with message '",'',$er_s);
+		$resp->descr = htmlspecialchars($er_s);
+	}
+	else{
+		$resp->descr = $e->getMessage();
 	}
 	$view = (isset($_REQUEST[PARAM_VIEW]))? $_REQUEST[PARAM_VIEW]:DEF_VIEW;
 	//throw new Exception("v=".USER_VIEWS_PATH.$view.'.php');
@@ -226,7 +253,7 @@ catch (Exception $e){
 		require_once($v_script);		
 	}
 	
-	$contrObj->write($view,$view,$er_code);
+	$contrObj->write($view,$view,$resp->result);
 }
 
 ?>

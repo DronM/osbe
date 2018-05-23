@@ -25,11 +25,15 @@ FieldJSON.prototype.getValueXHR = function(){
 
 FieldJSON.prototype.setValue = function(id,v){
 	if (!v && typeof(id)=="object"){
-		this.m_value = id;	
+		//structure or RefType?
+		this.m_value = id;
+		//(!id.getKeys && id.keys)? new RefType(id) : id;
+		//this.m_value = new RefType(id);
 	}
 	else if (!v && typeof(id)=="string" && id.length){
-	//console.log("FieldJSON.prototype.setValue ID="+this.getId()+" String="+id)
 		this.m_value = CommonHelper.unserialize(id);	
+		//console.log("FieldJSON.prototype.setValue value="+id)
+		//console.dir(this.m_value);
 	}
 	else if (v){
 		this.m_value = this.m_value || {};
@@ -37,3 +41,34 @@ FieldJSON.prototype.setValue = function(id,v){
 	}
 }
 
+FieldJSON.prototype.isEmpty = function(val,checkNull){
+	val = (val && val.getKeys)? val.getKeys() : val;
+	var r = (val==undefined);
+	if (!r){
+		r = true;
+		for(v in val){
+			if (checkNull && val[v]!==null || !checkNull && val[v]!==undefined){			
+				r = false;
+				break;
+			}
+		}
+	}
+	return r;
+}
+
+FieldJSON.prototype.isNull = function(){
+	var r = this.isEmpty(this.getValue(),true);
+	if (r){
+		r = this.isEmpty(this.getDefValue(),true);
+	}
+	return r;
+
+}
+
+FieldJSON.prototype.isSet = function(){
+	var r = this.isEmpty(this.getValue(),false);
+	if (r){
+		r = this.isEmpty(this.getDefValue(),false);
+	}
+	return !r;
+}

@@ -1,18 +1,15 @@
-/* Copyright (c) 2016 
-	Andrey Mikhalevich, Katren ltd.
-*/
-/*	
-	Description
-*/
-/** Requirements
- * @requires 
-*/
-
-/* constructor
-@param object options{
-
-}
-*/
+/**	
+ * @author Andrey Mikhalevich <katrenplus@mail.ru>, 2016
+ 
+ * @class
+ * @classdesc binding of form visual control to model
+ 
+ * @param {object} options
+ * @param {Control} options.control edit Control
+ * @param {Field} options.field
+ * @param {Model} options.model
+ * @param {array} options.keyIds 
+ */
 function DataBinding(options){
 	options = options || {};	
 	

@@ -374,7 +374,7 @@ GridAjx.prototype.onRefresh = function(callBack){
 		"ok":function(resp){
 			self.onGetData(resp);
 			if (callBack){
-				callBack();
+				callBack.call(self);
 			}
 		},
 		"fail":function(resp,erCode,erStr){

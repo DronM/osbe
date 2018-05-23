@@ -20,7 +20,7 @@ function GridCmdRowUp(id,options){
 
 	options.glyph = "glyphicon-arrow-up";
 	options.buttonClass = ButtonCtrl;
-	options.showCmdControl = true;
+	options.showCmdControl = (options.showCmdControl!=undefined)? options.showCmdControl:false;
 	
 	GridCmdRowUp.superclass.constructor.call(this,id,options);
 		

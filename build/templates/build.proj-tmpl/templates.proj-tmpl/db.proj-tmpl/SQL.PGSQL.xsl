@@ -31,6 +31,8 @@
 
 <xsl:variable name="DT_GEOM_POLYGON" select="'GeomPolygon'"/>
 <xsl:variable name="DT_GEOM_POINT" select="'GeomPoint'"/>
+<xsl:variable name="DT_TSVECTOR" select="'TSVector'"/>
+<xsl:variable name="DT_BYTEA" select="'bytea'"/>
 
 <xsl:variable name="CMD_DROP" select="'drop'"/>
 <xsl:variable name="CMD_CREATE" select="'add'"/>
@@ -67,24 +69,24 @@
 	<xsl:otherwise><xsl:value-of select="$model/field[@dataType=$DT_STRING or @dataType=$DT_TEXT][1]/@id"/></xsl:otherwise>
 	</xsl:choose>
 	</xsl:variable>
+	<xsl:if test="not($model[@refFunction])">
 --Refrerece type
 CREATE OR REPLACE FUNCTION <xsl:value-of select="@refTable"/>_ref(<xsl:value-of select="@refTable"/>)
   RETURNS json AS
 $$
 	SELECT json_build_object(
-		'RefType',
-		json_build_object(	
-			'keys',json_build_object(
-				<xsl:for-each select="$model/field[@primaryKey='TRUE']">
-				<xsl:if test="position() &gt; 1">,</xsl:if>'id',$1.<xsl:value-of select="@id"/>
-				</xsl:for-each>    
-				),	
-			'descr',$1.<xsl:value-of select="$display_field"/>
-		)
+		'keys',json_build_object(
+			<xsl:for-each select="$model/field[@primaryKey='TRUE']">
+			<xsl:if test="position() &gt; 1">,</xsl:if>'id',$1.<xsl:value-of select="@id"/>
+			</xsl:for-each>    
+			),	
+		'descr',$1.<xsl:value-of select="$display_field"/>,
+		'dataType','<xsl:value-of select="@refTable"/>'
 	);
 $$
   LANGUAGE sql VOLATILE COST 100;
 ALTER FUNCTION <xsl:value-of select="@refTable"/>_ref(<xsl:value-of select="@refTable"/>) OWNER TO ;	
+	</xsl:if>
 	</xsl:for-each>    	
 </xsl:template>
 
@@ -104,7 +106,10 @@ ALTER FUNCTION <xsl:value-of select="@refTable"/>_ref(<xsl:value-of select="@ref
 	</xsl:when>	
 	<xsl:when test="@cmd=$CMD_CREATE">
 		CREATE TABLE <xsl:value-of select="@dataTable"/>
-		(<xsl:apply-templates select="field"/>,CONSTRAINT <xsl:value-of select="@dataTable"/>_pkey PRIMARY KEY (<xsl:apply-templates select="field[@primaryKey='TRUE']" mode="primaryKey"/>));
+		(<xsl:apply-templates select="field"/>
+		<xsl:if test="field[@primaryKey='TRUE']">,CONSTRAINT <xsl:value-of select="@dataTable"/>_pkey PRIMARY KEY (<xsl:apply-templates select="field[@primaryKey='TRUE']" mode="primaryKey"/>)</xsl:if>
+		<xsl:apply-templates select="constraint"/>
+		);
 		<xsl:apply-templates select="index"/>
 		<xsl:apply-templates select="description"/>
 		ALTER TABLE <xsl:value-of select="@dataTable"/> OWNER TO <xsl:value-of select="/metadata/@owner"/>;
@@ -1066,6 +1071,10 @@ ALTER FUNCTION <xsl:value-of select="$open_period_prototype"/> OWNER TO <xsl:val
 	</xsl:choose>
 </xsl:template>
 
+<xsl:template match="constraint">	
+	,CONSTRAINT <xsl:value-of select="@id"/> CHECK (<xsl:value-of select="@expression"/>)
+</xsl:template>
+
 <!-- ??? Does not work with standart XSLTProcessor ???
 <xsl:template match="model[@virtual='TRUE' and (@cmd=$CMD_DROP or @cmd=$CMD_ALTER)]">
 	DROP VIEW <xsl:value-of select="@dataTable"/>;
@@ -1079,25 +1088,6 @@ ALTER FUNCTION <xsl:value-of select="$open_period_prototype"/> OWNER TO <xsl:val
 		</xsl:choose>
 	</xsl:variable>	
 	<xsl:variable name="func">enum_<xsl:value-of select="$enum_id"/>_val(<xsl:value-of select="$enum_id"/>,locales)</xsl:variable>
-	<!-- function-->
-	<xsl:choose>
-		<xsl:when test="@cmd=$CMD_DROP">
-		DROP FUNCTION <xsl:value-of select="$func"/>;
-		</xsl:when>
-		<xsl:otherwise>
-		/* function */
-		CREATE OR REPLACE FUNCTION <xsl:value-of select="$func"/>
-		RETURNS text AS $$
-			SELECT
-			CASE
-			<xsl:for-each select="value/*">WHEN $1='<xsl:value-of select="../@id"/>'::<xsl:value-of select="$enum_id"/> AND $2='<xsl:value-of select="local-name()"/>'::locales THEN '<xsl:value-of select="@descr"/>'
-			</xsl:for-each>ELSE ''
-			END;		
-		$$ LANGUAGE sql;	
-		ALTER FUNCTION <xsl:value-of select="$func"/> OWNER TO <xsl:value-of select="/metadata/@owner"/>;		
-		</xsl:otherwise>
-	</xsl:choose>
-	
 	<!-- type -->
 	<xsl:choose>
 		<xsl:when test="@cmd=$CMD_DROP">
@@ -1131,6 +1121,21 @@ ALTER FUNCTION <xsl:value-of select="$open_period_prototype"/> OWNER TO <xsl:val
 		<xsl:otherwise>
 		</xsl:otherwise>
 	</xsl:choose>
+	<!-- function-->
+	<xsl:if test="@cmd=$CMD_CREATE or @cmd=$CMD_ALTER or @cmd=$CMD_RENAME">
+	/* function */
+	CREATE OR REPLACE FUNCTION <xsl:value-of select="$func"/>
+	RETURNS text AS $$
+		SELECT
+		CASE
+		<xsl:for-each select="value/*">WHEN $1='<xsl:value-of select="../@id"/>'::<xsl:value-of select="$enum_id"/> AND $2='<xsl:value-of select="local-name()"/>'::locales THEN '<xsl:value-of select="@descr"/>'
+		</xsl:for-each>ELSE ''
+		END;		
+	$$ LANGUAGE sql;	
+	ALTER FUNCTION <xsl:value-of select="$func"/> OWNER TO <xsl:value-of select="/metadata/@owner"/>;		
+	</xsl:if>
+	
+	
 <!--	
 	<xsl:variable name="enum_id">
 		<xsl:choose>
@@ -1263,6 +1268,12 @@ ALTER FUNCTION <xsl:value-of select="$open_period_prototype"/> OWNER TO <xsl:val
 			<xsl:value-of select="concat(' REFERENCES ',@refTable,'(',@refField,')')"/>
 		</xsl:if>
 		
+		<!-- check -->
+		<xsl:if test="@checkExpression">
+			<xsl:value-of select="concat(' CHECK (',@checkExpression,')')"/>
+		</xsl:if>
+		
+		<xsl:apply-templates select="checkValues" />
 	</xsl:when>
 	<xsl:when test="@cmd=$CMD_RENAME">
 		ALTER COLUMN <xsl:value-of select="@id"/> RENAME TO <xsl:value-of select="@newId"/>
@@ -1274,16 +1285,21 @@ ALTER FUNCTION <xsl:value-of select="$open_period_prototype"/> OWNER TO <xsl:val
 		
 </xsl:template>
 
+<xsl:template match="checkValues">
+	CHECK (<xsl:value-of select="../@id"/> IN (<xsl:apply-templates select="checkValue"/>))
+</xsl:template>
+<xsl:template match="checkValue">
+	<xsl:if test="position() &gt; 1">,</xsl:if> '<xsl:value-of select="node()"/>'
+</xsl:template>
+
 <xsl:template match="model[@virtual='FALSE']/field[@primaryKey='TRUE']" mode="primaryKey">
-	<xsl:if test="position() &gt; 1"><xsl:value-of select="','"/>
-	</xsl:if><xsl:value-of select="@id"/>
+	<xsl:if test="position() &gt; 1">,</xsl:if><xsl:value-of select="@id"/>
 </xsl:template>
 
 <xsl:template match="model[@virtual='FALSE']/index">
 	DROP INDEX IF EXISTS <xsl:value-of select="@id"/>;
 	CREATE <xsl:if test="@unique='TRUE'"><xsl:value-of select="'UNIQUE '"/></xsl:if>INDEX <xsl:value-of select="@id"/>
-	ON <xsl:value-of select="../@dataTable"/>
-	(<xsl:apply-templates select="field"/><xsl:if test="field and expression">,</xsl:if><xsl:apply-templates select="expression"/>);
+	ON <xsl:value-of select="../@dataTable"/> <xsl:if test="@type"> USING <xsl:value-of select="@type"/></xsl:if>(<xsl:apply-templates select="field"/><xsl:if test="field and expression">,</xsl:if><xsl:apply-templates select="expression"/>);
 </xsl:template>
 
 <xsl:template match="model[@virtual='FALSE']/index/expression">
@@ -1334,6 +1350,8 @@ ALTER FUNCTION <xsl:value-of select="../@id"/>_descr(<xsl:value-of select="../@d
 		
 		<xsl:when test="$data_type=$DT_GEOM_POLYGON">geometry</xsl:when>
 		<xsl:when test="$data_type=$DT_GEOM_POINT">geometry</xsl:when>
+		
+		<xsl:when test="$data_type=$DT_TSVECTOR">tsvector</xsl:when>
 		
 		<xsl:when test="$data_type=$DT_JSON">json</xsl:when>
 		<xsl:when test="$data_type=$DT_JSONB">jsonb</xsl:when>

@@ -43,22 +43,31 @@ ViewAjx.prototype.defineField = function(i){
 	}
 }
 
-/* protected
-@param ServResponse resp can be undefined for simple copying data from model to controls
-@param string cmd insert||edit||copy
+/** protected
+ * @param {ServResponse} resp can be undefined for simple copying data from model to controls
+ * @param {string} copy/edit/insert
 
-Description
-	field resolving order:
-		this.m_dataBindings[].field
-		this.m_dataBindings[].fieldId
-		this.m_dataBindings[].control.getName()
-	othrewise skeeped
-*/
+ * Description
+ *	field resolving order:
+ *		this.m_dataBindings[].field
+ *		this.m_dataBindings[].fieldId
+ *		this.m_dataBindings[].control.getName()
+ *	othrewise skeeped
+ */
 ViewAjx.prototype.onGetData = function(resp,cmd){	
+	//backward compatibility
+	cmd = (cmd===true)? "copy":cmd;
+	var cmdCopy = (cmd=="copy");
+	var cmdInsert = (cmd=="insert");
+	
 	var models = {};
+	//console.log("ViewAjx.prototype.onGetData.cmdCopy="+cmdCopy)
 	for (var i=0;i<this.m_dataBindings.length;i++){
 	//console.log("dataBindings i="+i)
 		var m = this.m_dataBindings[i].getModel();		
+		if (!m){
+			throw new Error(CommonHelper.format(this.ER_NO_BINDING_MODEL,[i]));
+		}
 		var m_id = m.getId();
 		if (models[m_id]==undefined && resp && resp.modelExists(m_id)){
 			m.setData(resp.getModelData(m_id));
@@ -85,14 +94,14 @@ ViewAjx.prototype.onGetData = function(resp,cmd){
 					//debugger;
 					this.defineField(i);
 					//console.log("ViewAjx.prototype.onGetData defineField")
-					if (this.m_dataBindings[i].getField() && !(cmd=="copy" && f.getPrimaryKey()) ){						
+					if (this.m_dataBindings[i].getField() && !(cmdCopy && this.m_dataBindings[i].getField().getPrimaryKey()) ){						
 						init_val = this.m_dataBindings[i].getField().getValue();						
 						//console.log("ViewAjx.prototype.onGetData init_val="+init_val)
 					}			
 				}
-				
-				if (init_val && (!ctrl.getIsRef || !ctrl.getIsRef()) ){
-					if (ctrl.setInitValue){
+				//console.log("Setting init value "+ctrl.getId()+" val="+init_val)
+				if (init_val!=undefined && (!ctrl.getIsRef || !ctrl.getIsRef()) ){
+					if (ctrl.setInitValue && !cmdCopy && !cmdInsert){
 						ctrl.setInitValue(init_val);
 					}
 					else{
@@ -107,20 +116,39 @@ ViewAjx.prototype.onGetData = function(resp,cmd){
 						init_val_o = init_val;
 					}
 					else{
-						var key_ids = this.m_dataBindings[i].getKeyIds();
+						var key_ids = this.m_dataBindings[i].getKeyIds();						
 						if (!key_ids){
-							throw Error(CommonHelper.format(this.ER_CTRL_KEYS_NOT_BOUND,Array(ctrl.getName())));	
+							throw Error(CommonHelper.format(this.ER_CTRL_KEYS_NOT_BOUND,[ctrl.getName()]));	
+						}
+						//@ToDo !!!CHECK!!!
+						var m_keys;
+						//For EditSELECT!!!
+						if (ctrl.getModelKeyFields){
+							m_keys = ctrl.getModelKeyFields();
 						}
 						var keys = {};
 						for (var n=0;n<key_ids.length;n++){
-							keys[key_ids[n]] = m.getFieldValue(key_ids[n]);
+							var k_id;
+							if (m_keys){
+								k_id = m_keys[n].getId();
+							}
+							else{
+								k_id = key_ids[n];
+							}							
+							keys[k_id] = m.getFieldValue(key_ids[n]);
 						}					
 						init_val_o = new RefType({
 							"keys":keys,
-							"descr":init_val
+							"descr":init_val,
+							"dataType":undefined
 						});
 					}
-					ctrl.setInitValue(init_val_o);
+					if (ctrl.setInitValue && !cmdCopy && !cmdInsert){
+						ctrl.setInitValue(init_val_o);
+					}
+					else{
+						ctrl.setValue(init_val_o);
+					}
 				}
 			}
 		}
@@ -177,7 +205,9 @@ ViewAjx.prototype.getModified = function(cmd){
 	if (this.m_commands[cmd].getBindings()){
 		var b = this.m_commands[cmd].getBindings();
 		for (var i=0;i < b.length;i++){
+			//&& b[i].getControl().getEnabled()
 			if (b[i].getControl() && b[i].getControl().getModified()){
+			//console.log("Modified "+b[i].getControl().getId())
 				return true;
 			}
 		}
@@ -187,40 +217,27 @@ ViewAjx.prototype.getModified = function(cmd){
 
 /* public methods */
 
-ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
-	if (!this.m_commands[cmd]){
-		throw Error(this.ER_CMD_NOT_FOUND);
-	}
+/**
+ * @param {string} cmd
+ * @param {object} res {{object}old_keys, {bool}incorrect_vals, {bool}modified}
+ */
+ViewAjx.prototype.validate = function(cmd,validate_res){
+	validate_res = validate_res || {};
+	validate_res.incorrect_vals = false;
+		
 	var pm = this.m_commands[cmd].getPublicMethod();
 	if (!pm){
 		throw Error(this.ER_NO_PM);
-	}
-	
-	var incorrect_vals = false;
-	var modified = this.getModified(cmd);
-	//var pm_modified = false;
-	if (!modified){
-		var pm_fields = pm.getFields();
-		for (var fid in pm_fields){
-			if (pm_fields[fid].isSet()){
-				modified = true;
-				break;
-			}
-		}
-	}
-	
-	this.resetError();	
-	
-	//old keys for update
-	var old_keys = {};
-	
-	if (modified && this.m_commands[cmd].getBindings()){		
-		var bindings = this.m_commands[cmd].getBindings();
+	}	
+	var bindings = this.m_commands[cmd].getBindings();
+	if (bindings && bindings.length){		
+		this.resetError();	
+						
 		for (var i=0;i<bindings.length;i++){			
 			var bind = bindings[i];
 			var ctrl = bind.getControl();
 			if (!ctrl){
-				throw Error(CommonHelper.format(this.ER_NO_CTRL,Array(cmd,i)));	
+				throw Error(CommonHelper.format(this.ER_NO_CTRL,[cmd,i]));	
 			}
 			var f = bind.getField();			
 			if (!f && bind.getFieldId()){
@@ -232,11 +249,13 @@ ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
 				f = pm.getField(ctrl.getName());
 			}
 			else if (!f){
-				throw Error(CommonHelper.format(this.ER_CTRL_NOT_BOUND,Array(ctrl.getName())));	
+				throw Error(CommonHelper.format(this.ER_CTRL_NOT_BOUND,[ctrl.getName()]));	
 			}
-			if (ctrl.getModified && ctrl.getModified()){
+			if (ctrl.getModified && ctrl.getModified()){			
 				//is it an object field?
-				if (ctrl.getIsRef && ctrl.getIsRef()){			
+				if (ctrl.getIsRef && ctrl.getIsRef()
+				&& !(f.getDataType()==Field.prototype.DT_JSON || f.getDataType()==Field.prototype.DT_JSONB)
+				){			
 					//reference field with keys					
 					var keyIds = ctrl.getKeyIds();
 					if (keyIds.length>=1){
@@ -247,7 +266,7 @@ ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
 				else{
 					//simple field
 					var val = ctrl.getValue();
-					ctrl.setValid();
+					if (ctrl.setValid)ctrl.setValid();
 					
 					try{
 						if (ctrl.getValidator && ctrl.getValidator())ctrl.getValidator().validate(val);
@@ -259,34 +278,82 @@ ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
 						modified = true;						
 					}
 					catch(e){
-						ctrl.setNotValid(e.message);
-						incorrect_vals = true;
+						if (ctrl.setNotValid)ctrl.setNotValid(e.message);
+						validate_res.incorrect_vals = true;
 					}							
 				}
 			}
-			else if (ctrl.isNull && ctrl.isNull() && (ctrl.getRequired() || f.getValidator().getRequired())){
+			else if (ctrl.isNull && ctrl.isNull() && (ctrl.getRequired() || f.getValidator().getRequired()) && ctrl.setNotValid){
 				ctrl.setNotValid(f.getValidator().ER_EMPTY);
-				incorrect_vals = true;				
+				validate_res.incorrect_vals = true;				
 			}
-			
+			else if (ctrl instanceof EditFile){
+				//??? always reset files ??? All reset to deffault values
+				f.resetValue();
+			}
+				
 			//setting old keys for update
-			if (!incorrect_vals && f.getPrimaryKey() && pm.fieldExists(f.getOldId())){
+			if (validate_res.old_keys && !validate_res.incorrect_vals && f.getPrimaryKey() && pm.fieldExists(f.getOldId())){
 				//pm.setFieldValue(f.getOldId(),ctrl.getInitValue());
-				old_keys[f.getOldId()] = ctrl.getInitValue();
+				var init_val = ctrl.getInitValue();				
+				if (typeof init_val =="object"){
+					if  (init_val instanceof RefType){
+						init_val = init_val.getKey();
+					}
+					else{
+						for (var init_val_id in init_val){
+							init_val = init_val[init_val_id];
+							break;
+						}						
+					}					
+				}
+				validate_res.old_keys[f.getOldId()] = init_val;
 			}			
 		}
 	}
-	if (incorrect_vals){
+	return !validate_res.incorrect_vals;
+}
+
+ViewAjx.prototype.execCommand = function(cmd,sucFunc,failFunc){
+	if (!this.m_commands[cmd]){
+		throw Error(this.ER_CMD_NOT_FOUND);
+	}
+	var pm = this.m_commands[cmd].getPublicMethod();
+	if (!pm){
+		throw Error(this.ER_NO_PM);
+	}
+	
+	var validate_res = {
+		"incorrect_vals" : false,
+		"modified" : this.getModified(cmd),
+		"old_keys" : {}
+	};
+	//var pm_modified = false;
+	if (!validate_res.modified){
+		var pm_fields = pm.getFields();
+		for (var fid in pm_fields){
+			if (pm_fields[fid].isSet()){
+				validate_res.modified = true;
+				break;
+			}
+		}
+	}
+	
+	if (validate_res.modified){
+		this.validate(cmd,validate_res);
+	}
+	
+	if (validate_res.incorrect_vals){
 		this.setError(this.ER_ERRORS);
 	}
-	else if (modified){
+	else if (validate_res.modified){
 		if (!this.m_commands[cmd].getAsync()){
 			this.setTempDisabled(cmd);
 		}
 		
 		//old keys for update
-		for (oldid in old_keys){
-			pm.setFieldValue(oldid,old_keys[oldid]);
+		for (oldid in validate_res.old_keys){
+			pm.setFieldValue(oldid,validate_res.old_keys[oldid]);
 		}
 		
 		var self = this;
@@ -339,9 +406,9 @@ ViewAjx.prototype.setCommands = function(v){
 	this.m_commands = v; 
 }
 
-/*
-@param Command command, 
-*/
+/**
+ * @param Command command, 
+ */
 ViewAjx.prototype.addCommand = function(cmd){
 	this.m_commands[cmd.getId()] = cmd; 
 }
@@ -350,11 +417,18 @@ ViewAjx.prototype.getCommand = function(id){
 	return this.m_commands[id]; 
 }
 
-ViewAjx.prototype.toDOM = function(parent){
+/**
+ * @param {DOMNode} parent
+ * @param {string} cmd
+ */
+ViewAjx.prototype.toDOM = function(parent,cmd){
+	//backward compatibility
+	cmd = (cmd===true)? "copy":cmd;
 
+//console.log("ViewAjx.prototype.toDOM cmd="+cmd)
 	ViewAjx.superclass.toDOM.call(this,parent);
 	
-	this.onGetData();
+	this.onGetData(null,cmd);
 }
 
 ViewAjx.prototype.beforeExecCommand = function(cmd,pm){

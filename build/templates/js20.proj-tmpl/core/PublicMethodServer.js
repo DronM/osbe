@@ -11,6 +11,9 @@
  * @param {string} id - Object identifier
  * @param {namespace} options
  * @param {ControllerAjx} options.controller
+ * @param {string} options.requestType
+ * @param {bool} options.async
+ * @param {string} options.encType       
  */
 function PublicMethodServer(id,options){
 	options = options || {};	
@@ -21,6 +24,7 @@ function PublicMethodServer(id,options){
 		
 	this.setRequestType(options.requestType);
 	this.setAsync(options.async);
+	this.setEncType(options.encType);
 	
 	PublicMethodServer.superclass.constructor.call(this,id,options);
 }
@@ -32,6 +36,7 @@ extend(PublicMethodServer,PublicMethod);
 /* private members */
 PublicMethodServer.prototype.m_requestType;
 PublicMethodServer.prototype.m_sync;
+PublicMethodServer.prototype.m_encType;
 
 
 /* protected*/
@@ -46,15 +51,22 @@ PublicMethodServer.prototype.setRequestType = function(v){
 }
 
 PublicMethodServer.prototype.getAsync = function(){
-	this.m_async;
+	return this.m_async;
 }
 PublicMethodServer.prototype.setAsync = function(v){
 	this.m_async = v;
 }
 
-PublicMethodServer.prototype.download = function(viewId){
+PublicMethodServer.prototype.getEncType = function(){
+	return this.m_encType;
+}
+PublicMethodServer.prototype.setEncType = function(v){
+	this.m_encType = v;
+}
+
+PublicMethodServer.prototype.download = function(viewId,ind){
 	//arguments to fields
-	this.getController().download(this.getId(),viewId);
+	this.getController().download(this.getId(),viewId,ind);
 }
 PublicMethodServer.prototype.openHref = function(viewId,winParams){
 	this.getController().openHref(this.getId(),viewId,winParams);

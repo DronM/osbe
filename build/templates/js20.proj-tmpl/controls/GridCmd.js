@@ -90,6 +90,13 @@ GridCmd.prototype.getGrid = function(){
 	return this.m_grid;
 }
 
+GridCmd.prototype.setId = function(v){
+	this.m_id = v;
+}
+GridCmd.prototype.getId = function(){
+	return this.m_id;
+}
+
 
 GridCmd.prototype.addControl = function(control){
 	this.m_controls.push(control);
@@ -122,7 +129,7 @@ GridCmd.prototype.setApp = function(v){
 }
 
 //abstract function MUST be overriden
-GridCmd.prototype.onCommand = function(){
+GridCmd.prototype.onCommand = function(e){
 }
 
 GridCmd.prototype.onDelDOM = function(){

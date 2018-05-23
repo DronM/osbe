@@ -21,7 +21,4 @@ About_View.prototype.LB_TECH_MAIL = "Тех.поддержка:";
 About_View.prototype.LB_FW_SERVER_VERSION = "Версия платформы (сервер):";
 About_View.prototype.LB_FW_CLIENT_VERSION = "Версия платформы (клиент):";
 
-OutMailList_View.prototype.HEAD_TITLE = "Исходящие письма";
-OutMailDialog_View.prototype.HEAD_TITLE = "Исходящее письмо";
-
 UserList_View.prototype.HEAD_TITLE = "Пользователи";

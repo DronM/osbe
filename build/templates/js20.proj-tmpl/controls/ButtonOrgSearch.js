@@ -59,23 +59,7 @@ ButtonOrgSearch.prototype.doSearch = function(){
 					self.m_onGetData(m);
 				}
 				else{
-					var attr_coresp = {
-						"Наименование":"name",
-						"ФИО руководителя":"dir_name",
-						"Должность руководителя":"dir_post",
-						"ИНН":"inn",
-						"КПП":"kpp",
-						"ОГРН":"ogrn",
-						"ОКПО":"okpo",
-						"ОКВЭД":"okved"
-						//"Адрес":"legal_address"
-					}
-					while(m.getNextRow()){
-						var param = m.getFieldValue("param");
-						if (attr_coresp[param]){
-							self.m_viewContext.getElement(attr_coresp[param]).setValue(m.getFieldValue("val"));
-						}					
-					}
+					self.applyResult(m);
 				}
 			}
 		},
@@ -83,4 +67,28 @@ ButtonOrgSearch.prototype.doSearch = function(){
 			self.setEnabled(true);
 		}
 	});
+}
+
+ButtonOrgSearch.prototype.applyResult = function(model){
+	var attr_coresp = {
+		"Наименование":"name",
+		"ФИО руководителя":"dir_name",
+		"Должность руководителя":"dir_post",
+		"ИНН":"inn",
+		"КПП":"kpp",
+		"ОГРН":"ogrn",
+		"ОКПО":"okpo",
+		"ОКВЭД":"okved"
+		//"Адрес":"legal_address"
+	}
+	while(model.getNextRow()){
+		var param = model.getFieldValue("param");
+		if (attr_coresp[param]){
+			var el = this.m_viewContext.getElement(attr_coresp[param]);
+			if (el){
+				el.setValue(model.getFieldValue("val"));
+			}
+		}					
+	}
+
 }

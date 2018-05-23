@@ -8,7 +8,7 @@
  * @requires core/ControlContainer.js     
   
  * @param {string} id - html tag id
- * @param {namespase} options
+ * @param {object} options
  */
 function View(id,options){
 	options = options || {};	
@@ -71,7 +71,7 @@ View.prototype.setReadTempDisabled = function(){
 				this.m_controlStates.push({
 					"ctrl":ctrl,
 					"enabled":ctrl.getEnabled(),
-					"inputEnabled":ctrl.getInputEnabled()
+					"inputEnabled":ctrl.getInputEnabled? ctrl.getInputEnabled():true
 				});
 				ctrl.setEnabled(false);
 			}
@@ -85,7 +85,7 @@ View.prototype.setReadTempEnabled = function(){
 			if (this.m_controlStates[i].enabled){
 				this.m_controlStates[i].ctrl.setEnabled(true);
 			}
-			this.m_controlStates[i].ctrl.setInputEnabled(this.m_controlStates[i].inputEnabled);
+			if(this.m_controlStates[i].ctrl.setInputEnabled)this.m_controlStates[i].ctrl.setInputEnabled(this.m_controlStates[i].inputEnabled);
 		}
 	}
 }

@@ -58,7 +58,14 @@ function EditSelectRef(id,options){
 			self.callOnSelect();
 		}
 	}
-	
+	else{
+		this.m_origOnChange = options.events.change;
+		options.events.change = function(){
+			self.callOnSelect();
+			self.m_origOnChange();
+		}			
+	}
+
 	EditSelectRef.superclass.constructor.call(this, id, options);
 	
 	if (options.modelDataStr && this.m_model){		
@@ -67,12 +74,9 @@ function EditSelectRef(id,options){
 		}
 		this.m_model.setDate(options.modelDataStr);
 	}
-	this.onRefresh();
-	/*
-	if (options.refreshOnInit){
-		this.onRefresh();
-	}
-	*/
+	
+	if (!this.m_autoRefresh)this.onRefresh();
+	
 }
 extend(EditSelectRef,EditSelect);
 
@@ -168,16 +172,16 @@ EditSelectRef.prototype.reset = function(){
 	this.resetKeys();
 }
 
-/*
- * @param {Object|RefType} val
- */
+/**
+  * @param {Object|RefType} val
+  */
 EditSelectRef.prototype.setValue = function(val){
 //console.log("EditSelectRef.prototype.setValue")
 //console.dir(val)
 
-	if (val!=null && typeof val == "object" && val.getKeys && val.getDescr){
-		//RefType
-		var val = val.getKeys();
+	if (val!=null && typeof val == "object" && ( (val.getKeys && val.getDescr) || (val.keys && val.descr) ) ){
+		//RefType || RefType old style unserealized
+		var val = val.getKeys? val.getKeys():val.keys;
 		if (!this.m_keyIds){
 			this.m_keyIds = [];
 			for (var keyid in val){
@@ -185,47 +189,38 @@ EditSelectRef.prototype.setValue = function(val){
 			}
 		}
 	}
-	else if (val!=null && typeof val == "object" && val.keys && val.descr){
-		//RefType old style unserealized
-		var val = val.keys;
-		if (!this.m_keyIds){
-			this.m_keyIds = [];
-			for (var keyid in val){
-				this.m_keyIds.push(keyid);
-			}
-		}
-	}	
-	else if (this.m_keyIds && this.m_keyIds.length){
+	else{
+		if (!this.getModelKeyFields()){
+			this.defineModelKeyFieds();
+		}	
 		val_str = (val!=null)? val.toString():null;
 		val = {};
 		//First key???
-		val[this.m_keyIds[0]] = val_str;
+		val[this.getModelKeyFields()[0].getId()] = val_str;
 	}	
-	else{
-		throw Error(CommonHelper.format(this.ER_NO_KEYS,Array(this.getName())));
-	}
-
+/*
 	var model_keys = {};
 	var ind = 0;
 	for (var i=0;i<this.m_modelKeyFields.length;i++){
-//console.log("Setting model key "+this.m_modelKeyFields[i].getId()+" to "+val[this.m_keyIds[ind]])	
-		model_keys[this.m_modelKeyFields[i].getId()] = val[this.m_keyIds[ind]];		
+		var key_id = this.m_modelKeyFields[i].getId();
+		model_keys[key_id] = val[key_id];		
 		ind++;
 	}
-
-	//var model_keys_str = JSON.stringify(model_keys);
-	var key_set = false;
+*/
+	var rec_found;
 	for(var id in this.m_elements){
 		var v = this.m_elements[id].getValue();
+		rec_found = false;
 		for (var vk in v){
-			if (model_keys[vk] && v[vk]==model_keys[vk]){
-//console.log("Setting option by index "+id)			
-				this.selectOptionById(id);//CommonHelper.serialize(model_keys)
-				key_set = true;
+			rec_found = (v[vk]==val[vk]);
+			if (!rec_found){
 				break;			
 			}
 		}
-		if (key_set)break;
+		if (rec_found){
+			this.selectOptionById(id);
+			break;
+		}
 	}		
 
 	this.setKeys(val);
@@ -258,6 +253,8 @@ EditSelectRef.prototype.getValue = function(){
 }
 
 EditSelectRef.prototype.setInitValue = function(val){
+//console.log("EditSelectRef.prototype.setInitValue")
+//console.dir(val)
 	//@ToDo get rid of this!!!
 	/*
 	if (isNaN(val) || val=="NaN"){
@@ -270,6 +267,10 @@ EditSelectRef.prototype.setInitValue = function(val){
 		this.m_initValue = val;
 		this.setInitKeys(val.getKeys());
 	}	
+}
+
+EditSelectRef.prototype.getInitValue = function(){
+	return this.getInitKeys();
 }
 
 EditSelectRef.prototype.setCashable = function(v){
@@ -382,7 +383,9 @@ EditSelectRef.prototype.toDOM = function(parent){
 }
 
 EditSelectRef.prototype.onGetData = function(resp){
-//console.log("EditSelectRef.prototype.onGetData")
+//console.log("EditSelectRef.prototype.onGetData resp=")
+//console.dir(resp)
+
 	if (!this.m_model) return;
 	
 	if (resp && this.m_model){
@@ -472,7 +475,7 @@ EditSelectRef.prototype.onGetData = function(resp){
 	var opt_checked = false;
 	var old_keys;
 	
-	if (typeof(old_key_val) == "object" && old_key_val.getKeys){
+	if (old_key_val && typeof(old_key_val) == "object" && old_key_val.getKeys){
 		old_keys = old_key_val.getKeys();
 	}
 //console.log("EditSelectRef.prototype.onGetData OLdKeys=")
@@ -554,6 +557,7 @@ EditSelectRef.prototype.onGetData = function(resp){
 }
 
 EditSelectRef.prototype.onRefresh = function(){	
+//console.log("EditSelectRef.prototype.onRefresh")
 	if (this.getCashable() && this.m_model){
 		var cash = window.getApp().getCashData(this.m_model.getId());
 		if (cash){
